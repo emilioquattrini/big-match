@@ -416,10 +416,26 @@ async function registerWorker(): Promise<void> {
   if (!('serviceWorker' in navigator) || !import.meta.env.PROD) return;
   try {
     const registration = await navigator.serviceWorker.register(new URL('sw.js', assetBaseUrl).href, { scope: import.meta.env.BASE_URL });
-    const show = () => { if (registration.waiting && navigator.serviceWorker.controller) { waitingWorker = registration.waiting; el('update-notice').hidden = false; updateBusy(); } };
-    show(); registration.addEventListener('updatefound', () => { registration.installing?.addEventListener('statechange', show); });
+    let updateRequested = false;
+    const syncUpdateNotice = () => {
+      const waiting = registration.waiting;
+      const controller = navigator.serviceWorker.controller;
+      waitingWorker = waiting?.state === 'installed' && controller && waiting !== controller ? waiting : null;
+      el('update-notice').hidden = !waitingWorker;
+      updateBusy();
+    };
+    const watchWorkers = () => {
+      registration.installing?.addEventListener('statechange', syncUpdateNotice);
+      registration.waiting?.addEventListener('statechange', syncUpdateNotice);
+      syncUpdateNotice();
+    };
+    watchWorkers();
+    registration.addEventListener('updatefound', watchWorkers);
+    navigator.serviceWorker.addEventListener('controllerchange', syncUpdateNotice);
     el('apply-update').addEventListener('click', () => {
-      if (!waitingWorker || saveBusy || contactBusy || exportBusy || deleteBusy || state.pending || contactHasDraft()) return;
+      syncUpdateNotice();
+      if (updateRequested || !waitingWorker || saveBusy || contactBusy || exportBusy || deleteBusy || state.pending || contactHasDraft()) return;
+      updateRequested = true;
       navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); waitingWorker.postMessage({ type: 'ACTIVATE_UPDATE' });
     });
   } catch { /* Normal online operation stays available if cache installation fails. */ }

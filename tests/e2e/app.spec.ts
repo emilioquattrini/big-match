@@ -39,6 +39,9 @@ test('the current Pages prefix loads all cards and supports search without selec
   await page.goto('./');
   await expect(page.locator('button[data-card-id]')).toHaveCount(13);
   await expectCardProportions(page, '#grid .card img', 13);
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.waitForFunction(() => navigator.serviceWorker.controller?.state === 'activated');
+  await expect(page.locator('#update-notice')).toBeHidden();
   await page.locator('button[data-card-id="1"]').click();
   await page.locator('#search').fill('oCeAn');
   await expect(page.locator('button[data-card-id]:visible')).toHaveCount(1);

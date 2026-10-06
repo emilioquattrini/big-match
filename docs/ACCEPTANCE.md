@@ -1,19 +1,19 @@
 # BIG MATCH — piano di accettazione e registro delle prove
 
-Aggiornato il 6 ottobre 2026. Gli ID AT01–AT25 mantengono la corrispondenza con il backlog dell’audit. **Un test scritto non è un test superato; un test locale non prova il servizio ospitato o un dispositivo fisico.**
+Aggiornato il 6 ottobre 2026. Gli ID AT01–AT25 mantengono la corrispondenza con il backlog dell’audit. **Un test scritto non è un test superato; un test locale non prova il servizio ospitato o un dispositivo fisico.** Ogni evidenza sotto identifica la propria revisione; i [controlli della pull request](https://github.com/emilioquattrini/big-match/pull/1/checks) riportano lo stato del commit più recente.
 
 ## Stato delle evidenze
 
 | Livello | Evidenza disponibile | Limite / prossimo passo |
 |---|---|---|
-| TypeScript | Controlli dell’app, test browser e handler compilabili senza emissione. | Ripetere sul commit finale del PR. |
-| Domain, poster, storage, validazione, SQL/Edge e ampliamento catalogo | Ultima esecuzione locale coordinata: 56 test applicativi superati. | Auth e trasporto esterno sono simulati; PostgreSQL PGlite usa una connessione accodata. |
-| Build e service worker | 9 test Node/VM superati: scope, installazione completa, bypass API, attivazione esplicita, pulizia limitata alle proprie cache e allowlist esatta delle licenze pubbliche. Build e controllo artefatto superati localmente. | Il VM non riproduce il lifecycle completo di Safari/Chrome. |
-| Browser automatici | 16 scenari Playwright, 3 progetti, 48 esecuzioni previste. Scoperta della suite e typecheck verificabili senza browser. | Esecuzione da registrare in CI; browser locale non utilizzabile in questa sessione. Non sono dichiarati superati. |
+| TypeScript | Controlli dell’app, test browser e handler superati in CI sul commit `9f513be`. | Verifica statica; non sostituisce il collaudo hosted o fisico. |
+| Domain, poster, storage, validazione, SQL/Edge e ampliamento catalogo | 56 test applicativi superati localmente e nella CI del commit `9f513be`. | Auth e trasporto esterno sono simulati; PostgreSQL PGlite usa una connessione accodata. |
+| Build e service worker | 9 test Node/VM superati in CI: scope, installazione completa, bypass API, attivazione esplicita, pulizia limitata alle proprie cache e allowlist esatta delle licenze pubbliche. Build e controllo artefatto superati. | Il VM non riproduce il lifecycle completo di Safari/Chrome. |
+| Browser automatici | 16 scenari Playwright × 3 profili: **48/48 superati senza retry**, Chromium, mobile Chromium e WebKit, nella [run 37538304056](https://github.com/emilioquattrini/big-match/actions/runs/37538304056). | API/Auth simulati. WebKit usa recupero con origine spenta, come spiegato sotto. Nessuna prova fisica iPhone/Android dichiarata. |
 | Servizi ospitati | Codice, migrazione e procedure presenti. | Nessun progetto Supabase, gateway/Auth o scheduler di produzione configurato/verificato da questa implementazione. |
 | Dispositivi e fiera | Piano sotto. | Nessuna prova fisica iPhone/Android/iPad o rete della fiera dichiarata eseguita. |
 
-Quando la CI esegue i browser, allegare il link della run e aggiornare questa tabella con l’esito effettivo. Non convertire automaticamente in “superato” un requisito che include ancora una prova hosted o fisica.
+La [prima run](https://github.com/emilioquattrini/big-match/actions/runs/37535902187) aveva 37/48 esiti positivi. Le correzioni del focus e del banco di prova WebKit sono state confermate dalla run indicata sopra. Non convertire automaticamente in “superato” un requisito che include ancora una prova hosted o fisica.
 
 ## Regressioni automatiche
 
@@ -21,7 +21,9 @@ Quando la CI esegue i browser, allegare il link della run e aggiornare questa ta
 
 `tests/e2e/community.spec.ts` usa il vero SDK del client con un gateway/Auth fittizio: prima risposta, reload senza doppio invio, ack perduto, stesso ID al retry, conflitto con caricamento della versione nuova, snapshot personale, GET tardivo dopo chiusura, link senza identità, form catalogo con errore e cancellazione con errore. La fixture non sostituisce i test di autorizzazione e transazione del backend.
 
-Ogni contesto browser è isolato. Le richieste esterne sono intercettate o bloccate e gli indirizzi email delle prove terminano in `.invalid`. Report e immagini di CI contengono solo fixture. Il controllo PNG conserva il file nativo e una schermata del risultato; l’ispezione visiva rimane richiesta.
+Ogni contesto browser è isolato. Le richieste esterne sono intercettate o bloccate e gli indirizzi email delle prove terminano in `.invalid`. Report e immagini di CI contengono solo fixture. Il controllo PNG conserva il file nativo e viewport separate del risultato e della selezione. I tre PNG e le sei viewport della run registrata sono stati ispezionati: proporzioni e contenuti corretti. L'URL localhost nel poster è intenzionale per la fixture.
+
+L'ispezione della prima run verde ha rilevato carte troppo alte nell'interfaccia, nonostante il PNG esportato fosse corretto. La correzione CSS preserva proporzioni e illustrazioni. I test esistenti ora controllano la geometria effettiva delle 13 immagini della griglia e delle tre del risultato con tolleranza di un pixel; il numero di scenari rimane 16, eseguiti su tre profili.
 
 Le prove HTTP in `community.spec.ts` impostano `serviceWorkers: 'block'` per mantenere le richieste intercettabili, secondo il [limite documentato di Playwright](https://playwright.dev/docs/network#missing-network-events-and-service-workers). Il worker resta attivo nella prova dedicata di precaricamento/recupero. Su Chromium questa usa l’emulazione offline; su WebKit 1.63 spegne invece un server locale isolato e verifica che un `fetch` con `no-store` fallisca prima di riaprire l’app dalla cache. La distinzione è necessaria per [l’errore upstream #42775](https://github.com/microsoft/playwright/issues/42775): non equivale a una prova di modalità aereo su Safari fisico, che rimane in AT16/AT23.
 
@@ -36,7 +38,7 @@ Le priorità P0/P1 seguono il piano approvato. Mappa, contatti/evasione e kiosk 
 | ID | Priorità | Area e prova | Risultato atteso | Copertura / attività rimanente |
 |---|---|---|---|---|
 | AT01 | P0 | Selezione — Touch e tastiera scelgono 3 carte distinte; ricerca e rimozione coerenti. | 0/1/2 carte non producono partecipazione; quarta carta non aggiunta. | Browser: ricerca e stato selezione. Completare touch, quarta carta e tastiera su dispositivi reali. |
-| AT02 | P0 | Transizione — Ripetere terzo tap, deselezione e reset in ogni fase del reveal. | Nessun TypeError, risultato parziale o callback obsoleta. | Browser: click 1→2→3→rimozione nello stesso turno, oltre la scadenza del reveal. Esito CI da registrare. |
+| AT02 | P0 | Transizione — Ripetere terzo tap, deselezione e reset in ogni fase del reveal. | Nessun TypeError, risultato parziale o callback obsoleta. | Browser: click 1→2→3→rimozione nello stesso turno, oltre la scadenza del reveal. Superato sui tre profili della run registrata. |
 | AT03 | P0 | Dialogo — Tab/Shift+Tab, Escape, X, VIEW MY MATCH e browser Back. | Focus contenuto e restituito; risultato sempre riapribile. | Browser: attraversamento Tab/Shift+Tab, chiusura e riapertura. Escape, Back e ritorno del focus da completare su Safari reale. |
 | AT04 | P0 | DB — Inviare 0/1/2/4 carte, duplicate, inesistenti o di altro evento. Provare evento chiuso e versione catalogo incompatibile. | Richieste rifiutate; nessuna riga parziale. | SQL/Edge: vincoli reali e payload invalidi verificati localmente; configurazione hosted da provare. |
 | AT05 | P0 | Matching — Fixture: ABC, ABC, ABD, ACD, BCD, AEF, DEF; analizzare prima ABC. | Exact=1; close=3; totale=4; AB/AC/BC=3 inclusa propria risposta. | Domain + SQL: fixture di 7 risposte verificata localmente. Browser controlla anche la resa di exact=1/close=3. |
@@ -50,7 +52,7 @@ Le priorità P0/P1 seguono il piano approvato. Mappa, contatti/evasione e kiosk 
 | AT13 | P0 | PNG — Scaricare e aprire il PNG su iPhone/Android/desktop; ruotare durante generazione. | 1080×1920, tre carte giuste, nomi/URL leggibili, nessuna didascalia duplicata. | Poster unitario + browser: PNG scaricato e IHDR 1080×1920, allegato al report. Apertura file/qualità visiva sui telefoni da verificare. |
 | AT14 | P0 | Concorrenza export — Share e download quasi insieme; reset durante generazione. | Stesso snapshot; UI non alterata; file obsoleto non sostituisce quello nuovo. | Renderer separato e gestione della generazione. Prova manuale di share/download/rotazione e cambio composizione da completare. |
 | AT15 | P0 | Link e refresh — QR, link risultato, refresh diretto sul prefisso di produzione. | Pagina corretta; aprire link non crea partecipazione; nessuna credenziale nell'URL. | Browser: prefisso /big-match/, shared link senza signup/PUT e hash invalido. QR finale stampato da provare. |
-| AT16 | P0 | Offline — Dispositivo precaricato: modalità aereo, reload e riavvio browser. | Carte e poster disponibili; dati live dichiarati indisponibili; nessun falso salvataggio. | Worker VM: precache e bypass. Browser: reload offline dopo installazione. Riavvio reale e disponibilità cache OS da verificare. |
+| AT16 | P0 | Offline — Dispositivo precaricato: modalità aereo, reload e riavvio browser. | Carte e poster disponibili; dati live dichiarati indisponibili; nessun falso salvataggio. | Worker VM: precache e bypass. CI: Chromium offline; WebKit con origine spenta e risposta SW verificata. Riavvio reale, modalità aereo Safari e disponibilità cache OS da verificare. |
 | AT17 | P0 | Aggiornamenti — Client con cache precedente passa a release nuova, poi rollback. | Versione corretta senza perdere form/tentativo attivo; cambio tra sessioni. | Worker VM: nessun skip automatico, attivazione esplicita, cache precedente conservata. Update/rollback a due versioni reali da eseguire. |
 | AT18 | P0 | Privacy — Cancellare una partecipazione due volte; eseguire retention in ambiente test. Cancellare con PUT in volo, poi ritentare il PUT. | Decremento una volta, sessioni scadute/Auth orfani trattati, aggregati coerenti. La vecchia richiesta non ricrea la partecipazione. | SQL/Edge: cancellazione, replay e retention verificati localmente. Browser: cancellazione fallita e retry. Scheduler hosted da verificare. |
 | AT19 | P1 | Mappa — Dataset noto, zero dati, tab nascosto e movimento ridotto. | Pesi corretti, riepilogo testuale, no animazione o polling inutile. | Mappa di aggregati e riepilogo testuale implementati. Dati noti, tab nascosto, movimento ridotto e lettore schermo da completare. |
@@ -90,7 +92,8 @@ Compilare una riga per ogni prova manuale/hosted; sono ammesse più righe per lo
 | ID / gruppo | Commit o tag | Ambiente | Dispositivo / browser | Data e operatore | Esito | Prova allegata / problema |
 |---|---|---|---|---|---|---|
 | AT01–AT25 | Da compilare | Staging / produzione approvata | Da compilare | Da compilare | Da eseguire | — |
-| CI browser | Da compilare | Fixture locale in runner | Chromium / mobile Chromium / WebKit | Run CI | Da eseguire | URL run + report + PNG |
+| CI browser | `9f513be` | Fixture locale in runner | Chromium / mobile Chromium / WebKit | 6 ottobre 2026 UTC, GitHub Actions | Superato, 48/48 senza retry | [Run](https://github.com/emilioquattrini/big-match/actions/runs/37538304056), report e `browser-visuals-*` con PNG/diagnostica |
+| Ispezione visiva browser | `9f513be` | Artefatti CI | Tre poster e sei viewport dei profili sopra | 6 ottobre 2026 UTC, revisione delle immagini | Superato per proporzioni, contenuti e azioni | `browser-visuals-9f513be6aabb98b830417dc6a121ce2278efefcc`; il logo dell'header riceve inoltre uno sfondo rosa per migliorare il contrasto |
 | GO alla raccolta | Da compilare | Produzione | Dispositivi previsti | Responsabile | Da eseguire | Tutti i gate applicabili chiusi |
 
 Un P0 fallito o privo di prova prevista impedisce il GO alla raccolta. Per una funzione facoltativa è possibile mantenerla disabilitata e documentare la motivazione; non presentarla come disponibile. Il responsabile registra il via libera dopo le prove, senza confondere “codice implementato”, “CI superata”, “backend configurato” e “evento operativo”.
