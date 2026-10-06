@@ -9,6 +9,7 @@ Implemented for the confirmed first release: **13 original cards, visitors on th
 - **supabase/functions/big-match/**: HTTP handler, Deno entrypoint and independent TypeScript configuration.
 - **supabase/ops/install-retention.sql**: hosted installation of the hourly retention job.
 - **tests/backend/**: database tests and HTTP handler integration tests.
+- **tests/hosted/smoke.mjs**: manually invoked hosted gateway/Auth verification with an isolated synthetic event; never included in automatic test globs.
 
 Run from the repository root:
 
@@ -18,6 +19,12 @@ npx tsc --project supabase/functions/big-match/tsconfig.json --noEmit
 ~~~
 
 The tests execute the migration on PostgreSQL 18 through PGlite: SQL, constraints, functions, transactions, roles and RLS are real. The Edge test transport simulates Supabase Auth, while RPCs reach that database. PGlite queues a single connection; the 100-request replay test demonstrates database idempotence, not hosted multi-connection throughput. Real Auth, the Supabase gateway, venue network and scheduled-job execution still need deployment verification.
+
+### Manual hosted smoke test
+
+After hosted configuration, use `node tests/hosted/smoke.mjs --help` for the explicit setup/run workflow. The setup mode prints SQL for a fresh `smoke-<UUID>` event open for 30 minutes; review and apply it through the authorized database workflow. Run mode checks the fixture markers and zero baseline before writing. It accepts only a public `sb_publishable_` key and uses an untracked environment file.
+
+One run creates seven real anonymous Auth sessions and one synthetic catalogue request at an `example.invalid` address. It verifies coherent matching, retries, revision conflicts, private RPC restrictions, CORS, catalogue acknowledgement and erasure. Cleanup erases test responses and signs out; the remaining synthetic contact and technical records follow the fixture's one-day retention. Reported cleanup failures need operator inspection. The public event is never used. This is a functional gateway test, not a load test, a browser/device test or proof that the hourly retention job has run.
 
 ## Hosted configuration
 
