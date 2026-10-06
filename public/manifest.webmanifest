@@ -1,0 +1,15 @@
+{
+  "id": "/big-match/",
+  "name": "BIG MATCH — Impersonae",
+  "short_name": "BIG MATCH",
+  "description": "Choose three Impersonae and discover connections in your vision of design.",
+  "lang": "en",
+  "start_url": "/big-match/",
+  "scope": "/big-match/",
+  "display": "standalone",
+  "background_color": "#F7F4EE",
+  "theme_color": "#F15C9A",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
