@@ -8,6 +8,21 @@ async function choose(page: Page, ids = [1, 2, 3]) {
   await expect(page.locator('#result')).toBeVisible();
 }
 
+async function expectCardProportions(page: Page, selector: string, count: number) {
+  const images = page.locator(selector);
+  await expect(images).toHaveCount(count);
+  const sizes = await images.evaluateAll(elements => elements.map(element => {
+    const { width, height } = element.getBoundingClientRect();
+    return { width, height };
+  }));
+  for (const [index, { width, height }] of sizes.entries()) {
+    expect(width, `${selector} image ${index + 1} has a rendered width`).toBeGreaterThan(0);
+    // HTML width/height attributes reserve space, but must not force a 640px-tall
+    // image when responsive CSS narrows the card. Allow only pixel rounding.
+    expect(Math.abs(height - width * 640 / 432), `${selector} image ${index + 1} keeps its card proportions`).toBeLessThanOrEqual(1);
+  }
+}
+
 test.beforeEach(async ({ page, baseURL }) => {
   const origin = new URL(baseURL!).origin;
   // No browser test can write into a real event, even if the artifact is misconfigured.
@@ -23,6 +38,7 @@ test('the current Pages prefix loads all cards and supports search without selec
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
   await expect(page.locator('button[data-card-id]')).toHaveCount(13);
+  await expectCardProportions(page, '#grid .card img', 13);
   await page.locator('button[data-card-id="1"]').click();
   await page.locator('#search').fill('oCeAn');
   await expect(page.locator('button[data-card-id]:visible')).toHaveCount(1);
@@ -104,6 +120,7 @@ test('download creates a real 1080 by 1920 PNG', async ({ page }, testInfo) => {
   await page.goto('./');
   await choose(page);
   await expect(page.locator('#download')).toBeEnabled();
+  await expectCardProportions(page, '#trio img', 3);
   const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#download').click()]);
   const location = await download.path();
   expect(location).toBeTruthy();
@@ -116,9 +133,19 @@ test('download creates a real 1080 by 1920 PNG', async ({ page }, testInfo) => {
   await download.saveAs(artifact);
   await testInfo.attach('Native canvas Story — 1080×1920', { path: artifact, contentType: 'image/png' });
   const screenshot = testInfo.outputPath('big-match-result-view.png');
-  await page.screenshot({ path: screenshot, fullPage: true });
-  await testInfo.attach('Result view', { path: screenshot, contentType: 'image/png' });
+  await page.locator('#result').evaluate(element => element.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect.poll(() => page.locator('#result').evaluate(element => element.scrollTop)).toBe(0);
+  // A full-page capture composites a fixed dialog into the longer, inert page.
+  // The actual viewport preserves the user-visible modal geometry instead.
+  await page.screenshot({ path: screenshot });
+  await testInfo.attach('Result dialog viewport', { path: screenshot, contentType: 'image/png' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.locator('#close').click();
+  await expect(page.locator('#result')).not.toBeVisible();
+  await page.locator('#pick-title').evaluate(element => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
+  const selectionScreenshot = testInfo.outputPath('big-match-selection-view.png');
+  await page.screenshot({ path: selectionScreenshot });
+  await testInfo.attach('Card selection viewport', { path: selectionScreenshot, contentType: 'image/png' });
 });
 
 test('a shared composition is read-only; invalid card routes do not become selections', async ({ page }) => {

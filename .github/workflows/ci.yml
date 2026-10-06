@@ -50,6 +50,7 @@ jobs:
           path: |
             test-results/**/big-match-story-1080x1920.png
             test-results/**/big-match-result-view.png
+            test-results/**/big-match-selection-view.png
             test-results/**/network-diagnostics.json
             test-results/**/error-context.md
           if-no-files-found: ignore
