@@ -51,6 +51,38 @@ const result = el<HTMLDialogElement>('result');
 const privacy = el<HTMLDialogElement>('privacy');
 const deleteDialog = el<HTMLDialogElement>('delete-dialog');
 const search = el<HTMLInputElement>('search');
+
+// Native modal dialogs make the page inert, but a full Tab cycle can still move
+// focus to the browser/body. Keep keyboard navigation inside the active modal.
+let focusOwner: HTMLDialogElement = result;
+document.addEventListener('focusin', event => {
+  const owner = event.target instanceof Element ? event.target.closest<HTMLDialogElement>('dialog') : null;
+  if (owner && [result, privacy, deleteDialog].includes(owner)) focusOwner = owner;
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Tab' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+  const dialog = focusOwner.open ? focusOwner : [privacy, deleteDialog, result].find(candidate => candidate.open);
+  if (!dialog) return;
+  const controls = [...dialog.querySelectorAll<HTMLElement>(
+    'a[href], button, input:not([type="hidden"]), select, textarea, summary, [tabindex]',
+  )].filter(control => control.tabIndex >= 0 && !control.matches(':disabled')
+    && !control.closest('[hidden], [inert]') && control.getClientRects().length > 0
+    && getComputedStyle(control).visibility === 'visible');
+  if (!controls.length) {
+    event.preventDefault();
+    const heading = dialog.querySelector<HTMLElement>('h2');
+    if (heading) { heading.tabIndex = -1; heading.focus(); }
+    else dialog.focus();
+    return;
+  }
+  const first = controls[0]!, last = controls[controls.length - 1]!;
+  const active = document.activeElement;
+  if (!dialog.contains(active) || (event.shiftKey ? active === first : active === last)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  }
+});
+
 function persist(): boolean { state.selectedIds = [...selected]; localSaved = saveState(storage, key, state); return localSaved; }
 function localDescription(): string { return localSaved ? 'Your composition is kept on this device.' : 'Your composition is available while this page stays open. This browser could not save it.'; }
 function same(a: readonly number[], b: readonly number[]): boolean { return a.length === 3 && b.length === 3 && [...a].sort((x,y)=>x-y).join('-') === [...b].sort((x,y)=>x-y).join('-'); }

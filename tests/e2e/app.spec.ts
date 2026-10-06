@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { startStaticOrigin } from './static-origin.ts';
 
 async function choose(page: Page, ids = [1, 2, 3]) {
   for (const id of ids) await page.locator(`button[data-card-id="${id}"]`).click();
@@ -114,7 +115,9 @@ test('download creates a real 1080 by 1920 PNG', async ({ page }, testInfo) => {
   const artifact = testInfo.outputPath('big-match-story-1080x1920.png');
   await download.saveAs(artifact);
   await testInfo.attach('Native canvas Story — 1080×1920', { path: artifact, contentType: 'image/png' });
-  await testInfo.attach('Result view', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
+  const screenshot = testInfo.outputPath('big-match-result-view.png');
+  await page.screenshot({ path: screenshot, fullPage: true });
+  await testInfo.attach('Result view', { path: screenshot, contentType: 'image/png' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
@@ -129,15 +132,36 @@ test('a shared composition is read-only; invalid card routes do not become selec
   await expect(page.locator('#result')).not.toBeVisible();
 });
 
-test('preloaded shell can reload offline and never claims a server save', async ({ page, context }) => {
-  await page.goto('./');
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await page.reload();
-  await context.setOffline(true);
-  await page.reload();
-  await expect(page.locator('button[data-card-id]')).toHaveCount(13);
-  await choose(page);
-  await expect(page.locator('body')).not.toContainText('CONTACT SAVED');
-  await expect(page.locator('#save-status')).toContainText(/unavailable|on this device|offline/i);
-  await context.setOffline(false);
+test('preloaded shell survives an unavailable network origin without claiming a server save', async ({ page, context, browserName, baseURL }, testInfo) => {
+  // Playwright 1.63 WebKit rejects even literal SW responses under setOffline:
+  // https://github.com/microsoft/playwright/issues/42775. Stop an isolated origin instead.
+  const isolated = browserName === 'webkit' ? await startStaticOrigin(new URL(baseURL!).pathname) : null;
+  try {
+    if (isolated) {
+      await page.unrouteAll({ behavior: 'wait' });
+      const origin = new URL(isolated.url).origin;
+      await page.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort('blockedbyclient'));
+      testInfo.annotations.push({ type: 'coverage', description: 'WebKit 1.63: stopped-origin recovery; physical airplane mode remains a device acceptance test.' });
+    }
+    await page.goto(isolated?.url || './');
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await page.reload();
+    await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+    expect(await page.evaluate(async () => Boolean(await caches.match(location.origin + location.pathname)))).toBe(true);
+    if (isolated) await isolated.stop(); else await context.setOffline(true);
+    // Negative control: a request explicitly bypassing the worker cannot reach the origin.
+    expect(await page.evaluate(async () => { try { await fetch(location.href, { cache: 'no-store' }); return false; } catch { return true; } })).toBe(true);
+    const recovered = await page.reload();
+    expect(recovered?.status()).toBe(200);
+    expect(recovered?.fromServiceWorker()).toBe(true);
+    await expect(page.locator('button[data-card-id]')).toHaveCount(13);
+    await choose(page);
+    await expect(page.locator('#download')).toBeEnabled();
+    await expect(page.locator('#export-status')).toContainText('Your Story is ready');
+    await expect(page.locator('body')).not.toContainText('CONTACT SAVED');
+    await expect(page.locator('#save-status')).toContainText(/unavailable|on this device|offline/i);
+  } finally {
+    await isolated?.stop();
+    await context.setOffline(false);
+  }
 });

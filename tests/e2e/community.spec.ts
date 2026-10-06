@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { EventFixture } from './api-fixture.ts';
+import { writeFile } from 'node:fs/promises';
+
+// HTTP contract tests require routable requests. Worker lifecycle is tested separately.
+// https://playwright.dev/docs/network#missing-network-events-and-service-workers
+test.use({ serviceWorkers: 'block' });
 
 async function choose(page: Page) {
   for (const id of [1, 2, 3]) await page.locator(`button[data-card-id="${id}"]`).click();
@@ -12,7 +17,18 @@ test.beforeEach(async ({ context, baseURL }) => {
   fixture = new EventFixture();
   await fixture.install(context, baseURL!);
 });
-test.afterEach(() => { expect(fixture.unexpectedRequests).toEqual([]); });
+test.afterEach(async ({}, testInfo) => {
+  const file = testInfo.outputPath('network-diagnostics.json');
+  await writeFile(file, JSON.stringify({
+    project: testInfo.project.name, status: testInfo.status,
+    authSignups: fixture.authSignups, committedWrites: fixture.committedWrites,
+    putAttempts: fixture.putBodies.length, contactAttempts: fixture.contactBodies.length,
+    deleteAttempts: fixture.deleteCalls, unexpectedRequests: fixture.unexpectedRequests,
+    transport: fixture.diagnostics,
+  }, null, 2));
+  await testInfo.attach('Fixture transport diagnostics', { path: file, contentType: 'application/json' });
+  expect(fixture.unexpectedRequests).toEqual([]);
+});
 
 test('a genuine zero response count becomes one private browser response', async ({ page }) => {
   await page.goto('./');

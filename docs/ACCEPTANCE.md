@@ -23,6 +23,10 @@ Quando la CI esegue i browser, allegare il link della run e aggiornare questa ta
 
 Ogni contesto browser è isolato. Le richieste esterne sono intercettate o bloccate e gli indirizzi email delle prove terminano in `.invalid`. Report e immagini di CI contengono solo fixture. Il controllo PNG conserva il file nativo e una schermata del risultato; l’ispezione visiva rimane richiesta.
 
+Le prove HTTP in `community.spec.ts` impostano `serviceWorkers: 'block'` per mantenere le richieste intercettabili, secondo il [limite documentato di Playwright](https://playwright.dev/docs/network#missing-network-events-and-service-workers). Il worker resta attivo nella prova dedicata di precaricamento/recupero. Su Chromium questa usa l’emulazione offline; su WebKit 1.63 spegne invece un server locale isolato e verifica che un `fetch` con `no-store` fallisca prima di riaprire l’app dalla cache. La distinzione è necessaria per [l’errore upstream #42775](https://github.com/microsoft/playwright/issues/42775): non equivale a una prova di modalità aereo su Safari fisico, che rimane in AT16/AT23.
+
+L’artefatto CI `browser-visuals-*` separa PNG, schermate del risultato e diagnostica essenziale dagli archivi trace. La diagnostica riporta metodo, origine/path, stato HTTP ed esito della richiesta, senza header, token, query string o contenuto del form. Gli archivi completi rimangono disponibili in `browser-regressions-*`.
+
 I comandi, le variabili della fixture e la pubblicazione sono in [RELEASE.md](RELEASE.md). Gli invarianti SQL e i limiti della prova sono in [BACKEND.md](BACKEND.md); provenienza dell’artwork e numerazione in [CATALOG.md](CATALOG.md).
 
 ## Criteri di accettazione

@@ -58,6 +58,10 @@ Questi valori sono fixture pubbliche senza credenziali reali. Tutte le richieste
 
 Il report è in `playwright-report/`; trace, schermate e PNG scaricati sono in `test-results/`. Il test PNG controlla i byte del file scaricato, inclusa la dimensione nativa 1080×1920, e allega il file alla prova. Chromium con viewport mobile è un'emulazione e WebKit su Linux non è un iPhone reale.
 
+Le prove del contratto HTTP disabilitano il worker soltanto in `community.spec.ts`, come raccomandato dalla [documentazione Playwright sul routing](https://playwright.dev/docs/network#missing-network-events-and-service-workers): le richieste gestite da un worker possono sfuggire ai mock. Le prove dedicate mantengono il worker reale. Per il recupero dalla cache, Chromium usa `setOffline(true)`; WebKit 1.63 usa un'origine locale isolata che viene effettivamente spenta, perché [l'issue upstream #42775](https://github.com/microsoft/playwright/issues/42775) documenta un errore dell'emulazione offline anche con risposte locali del worker. Un controllo `fetch` con `no-store` deve fallire prima del reload dalla cache. Questa prova WebKit verifica l'indisponibilità dell'origine e non sostituisce la modalità aereo su Safari fisico.
+
+La CI pubblica anche un artefatto separato `browser-visuals-*` con i tre PNG, schermate desktop/mobile e diagnostica HTTP essenziale senza header, token o corpi dei form. Rimane piccolo e consultabile separatamente dagli archivi trace del report completo.
+
 ## 3. Configurazione pubblica e server
 
 | Variabile frontend | Requisito |

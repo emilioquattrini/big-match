@@ -27,12 +27,14 @@ The function's **verify_jwt=false** setting allows the public configuration, agg
 
 | Server environment variable | Value |
 |---|---|
-| SUPABASE_URL | Project URL, normally supplied by Supabase. |
-| SUPABASE_SECRET_KEY | Server secret key; the platform's SUPABASE_SECRET_KEYS JSON/default is also supported. |
+| SUPABASE_URL | Project URL, automatically injected by hosted Supabase. |
+| SUPABASE_SECRET_KEYS | Automatically injected JSON dictionary; the handler reads its `default` server key. |
 | BIG_MATCH_ALLOWED_ORIGINS | Exact origins separated by commas, including only approved production/preview origins. |
 | BIG_MATCH_RATE_LIMIT_SECRET | Random secret of at least 32 characters for short-lived keyed rate-limit identifiers. |
 
-A legacy SUPABASE_SERVICE_ROLE_KEY is supported only as a server fallback. Never put a secret key into VITE_* configuration or source control. Blank server configuration returns 503; it never opens a less protected mode.
+In the hosted Dashboard or CLI, configure only the custom values **BIG_MATCH_ALLOWED_ORIGINS** and **BIG_MATCH_RATE_LIMIT_SECRET**. The `SUPABASE_` prefix is reserved: hosted secrets management rejects user-created names with that prefix. Do not upload local-only SUPABASE_* entries as hosted secrets.
+
+SUPABASE_SECRET_KEY is supported for a local or self-hosted runtime where you control the environment; it is not a custom secret to create on hosted Supabase. A platform-supplied legacy SUPABASE_SERVICE_ROLE_KEY is also supported as a server fallback. Never put a secret key into VITE_* configuration or source control. Blank server configuration returns 503; it never opens a less protected mode.
 
 For the existing site, the allowed origin is **https://emilioquattrini.github.io**, without /big-match/. CORS is a browser rule; verified Auth, database constraints and explicit RPC grants enforce access.
 
@@ -167,4 +169,5 @@ Before public collection verify: actual secret configuration, real Auth and any 
 - [Data API security](https://supabase.com/docs/guides/api/securing-your-api)
 - [Database functions](https://supabase.com/docs/guides/database/functions)
 - [Edge authorization](https://supabase.com/docs/guides/functions/auth)
+- [Edge environment variables and reserved secret names](https://supabase.com/docs/guides/functions/secrets)
 - [Cron quickstart](https://supabase.com/docs/guides/cron/quickstart)

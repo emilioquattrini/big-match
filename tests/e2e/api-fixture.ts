@@ -23,6 +23,7 @@ export class EventFixture {
   putBodies: PendingParticipation[] = [];
   contactBodies: Array<{ email: string; name?: string; privacyVersion: string; requestId: string; website?: string }> = [];
   unexpectedRequests: string[] = [];
+  diagnostics: Array<{ phase: string; method: string; origin: string; path: string; status?: number; failure?: string }> = [];
   authSignups = 0;
   committedWrites = 0;
   deleteCalls = 0;
@@ -45,6 +46,15 @@ export class EventFixture {
   async install(context: BrowserContext, baseURL: string): Promise<void> {
     this.browserOrigin = new URL(baseURL).origin;
     if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(baseURL).hostname)) throw new Error('Fixture tests require a local app.');
+    // Record transport outcomes only: no headers, tokens, bodies, query strings or contact details.
+    context.on('response', response => {
+      const url = new URL(response.url());
+      this.diagnostics.push({ phase: 'response', method: response.request().method(), origin: url.origin, path: url.pathname, status: response.status() });
+    });
+    context.on('requestfailed', request => {
+      const url = new URL(request.url());
+      this.diagnostics.push({ phase: 'failed', method: request.method(), origin: url.origin, path: url.pathname, failure: request.failure()?.errorText });
+    });
     await context.route('**/*', async route => {
       const url = new URL(route.request().url());
       if (!['http:', 'https:'].includes(url.protocol) || url.origin === this.browserOrigin) return route.continue();
