@@ -1,6 +1,6 @@
 # BIG MATCH — stato della consegna
 
-Registro aggiornato il 7 ottobre 2026 (Europe/Rome). Il codice è implementato, pubblicato nel ramo di sviluppo e sottoposto a collaudo automatico su GitHub. Le evidenze qui registrate identificano il commit verificato; per le revisioni successive consultare i [controlli correnti della pull request](https://github.com/emilioquattrini/big-match/pull/1/checks). Non costituisce una dichiarazione di rilascio in produzione.
+Registro aggiornato il 7 ottobre 2026 (Europe/Rome). Il codice è implementato e pubblicato nel ramo di sviluppo; il backend dedicato Supabase Pro è installato e ha superato il collaudo funzionale sul servizio reale. L'evento pubblico rimane draft e la nuova versione frontend non è ancora pubblicata. Le evidenze qui registrate identificano le versioni verificate; per le revisioni successive consultare i [controlli correnti della pull request](https://github.com/emilioquattrini/big-match/pull/1/checks).
 
 ## Versione di partenza e lavoro preparato
 
@@ -25,6 +25,10 @@ Il generatore `npm run catalog:sql` prepara l'estensione del catalogo per un eve
 | Build e controllo release | Superati localmente e in CI | Artefatto compilato di 25 file; la CI usa esclusivamente configurazione e credenziali fittizie. Versione e dimensioni sono riportate nel log della run. |
 | Dipendenze npm | Nessuna vulnerabilità segnalata nell'audit eseguito | Fotografia del registro al momento della verifica; non certifica l'assenza di vulnerabilità. |
 | Suite browser | 48/48 superati, senza retry | [Run delle correzioni finali](https://github.com/emilioquattrini/big-match/actions/runs/37539548778), commit `c51fb3f`: 16 scenari su Chromium, Chromium mobile e WebKit. Anche i controlli del codice, i 56 test applicativi/SQL e i 9 test cache sono superati nella stessa run. |
+| CI della preparazione hosted | Superata | [Run 37541220504](https://github.com/emilioquattrini/big-match/actions/runs/37541220504), commit `9279bcf414e10bdd56ed609b4bcd59d7fc4520d1`: 56 test applicativi/SQL, 9 cache e 48 browser, senza errori, skip o retry. |
+| Build con progetto Supabase reale | Superata | 25 file, 615.792 byte, versione `ac48e8879f0cf244`; controllo locale `--production` superato. Il gate aggiuntivo `--check-backend` rileva l'informativa pubblica incompleta e impedisce il rilascio. |
+| Gateway e Auth ospitati | Superati | `tests/hosted/smoke.mjs` sul progetto dedicato: 7 sessioni anonime reali, matching, revisioni, replay, autorizzazione, CORS, catalogo e cancellazione. Dettagli nella sezione Supabase. |
+| Scheduler ospitato | Superato | Esecuzione reale di `bm_cleanup()` tramite job di verifica completata il 6 ottobre alle 23:28:00 UTC. Il job temporaneo si è rimosso; quello orario resta attivo. |
 
 Le prove browser del poster hanno scaricato PNG reali a 1080×1920 su tutti e tre i profili. Sono stati ispezionati i tre poster e le sei viewport di selezione/risultato: illustrazioni intere, proporzioni corrette, titoli e azioni leggibili. Le [evidenze visive finali](https://github.com/emilioquattrini/big-match/actions/runs/37539548778/artifacts/11447768476) confermano anche logo leggibile e assenza di un falso avviso di aggiornamento al primo caricamento. Le 24 diagnostiche del contratto API riportano zero richieste inattese. Le prove su iPhone e Android fisici restano distinte dall'emulazione.
 
@@ -40,13 +44,28 @@ La rifinitura successiva all'ispezione aggiunge uno sfondo rosa al logo bianco d
 
 Il collegamento è stato aggiornato dall'utente. Creazione del ramo, caricamento dei sorgenti e apertura della pull request sono riusciti. Il contenuto remoto è stato verificato confrontando l'hash dell'intero albero Git con quello locale; il commit del collaudo frontend finale usa l'albero `f25f685373e6d1ca7c1f34ca989191a9c4c5522f`. La pull request rimane draft e il ramo principale non è stato modificato.
 
-### Progetto Supabase
+### Progetto Supabase: installato e collaudato
 
-L'utente ha confermato l'organizzazione per un nuovo progetto dedicato a BIG MATCH. La lettura dell'organizzazione riesce e riporta il piano Free; la lista progetti è vuota. Nessun progetto ospitato è stato creato o configurato da questa consegna.
+L'utente ha completato il passaggio a **Pro** e creato **Big Match** nell'organizzazione **justcolors**. Piano, progetto e stato `ACTIVE_HEALTHY` sono stati verificati tramite il servizio; la dashboard conferma compute Micro e regione Francoforte (`eu-central-1`). Il riferimento progetto è `zwjzlzyqsqxqtjxhgmbs` e l'origine API è `https://zwjzlzyqsqxqtjxhgmbs.supabase.co`. Non sono stati attivati ulteriori componenti a pagamento.
 
-La verifica del costo tramite il collegamento restituisce `UNAVAILABLE`: il server non espone il comando richiesto. Il comando di creazione disponibile richiede ancora una conferma di costo valida. Il piano dell'organizzazione non è stato trattato come un preventivo e nessuna creazione è stata tentata. Occorre completare la verifica del costo e la creazione tramite un percorso supportato, poi configurare Auth/Edge, applicare migrazione e seed e verificare il servizio. Le chiavi server non appartengono al repository o ai file pubblici.
+Installazione effettiva:
 
-Il collaudo manuale `tests/hosted/smoke.mjs` prepara e verifica un evento sintetico dedicato con slug `smoke-<UUID>`. Usa soltanto una chiave pubblicabile, rifiuta l'evento pubblico e non parte nelle suite automatiche. Il suo passaggio sul servizio ospitato resta da eseguire: la preparazione del test non dimostra che Auth o il gateway siano già configurati.
+- Migrazione applicativa `20261006232008_big_match.sql`, con contenuto identico alla versione portabile già collaudata. Il nome locale è stato allineato alla versione assegnata dal servizio; i 31 test backend passano dopo la rinomina.
+- Seed delle 13 carte `impersonae-v1` e dell'evento pubblico `big-2026` in draft.
+- Migrazione `20261006232609_big_match_retention_indexes.sql`: indici per la pulizia degli attori e il cascade delle ricevute catalogo. Non sono stati aggiunti indici ai piccoli elenchi del catalogo senza un percorso di accesso che li giustifichi.
+- Migrazione `20261006232718_big_match_retention_schedule.sql`: `pg_cron` e job `big-match-retention`, attivo al minuto 17 di ogni ora UTC.
+- Edge Function `big-match`, versione 1, stato `ACTIVE`, con autenticazione verificata dal codice per ogni rotta privata e gateway pubblico per le rotte previste.
+- Origine consentita `https://emilioquattrini.github.io`, segreto casuale per gli identificatori temporanei dei limiti e accesso anonimo Auth attivo. Le chiavi server e il segreto non sono nel repository o nei file pubblici.
+
+Le 11 tabelle private hanno RLS attiva. Nessuna delle 8 RPC pubbliche applicative è eseguibile dai ruoli browser `anon` o `authenticated`; il ruolo backend `service_role` dispone degli accessi previsti. Gli avvisi informativi sull'assenza di policy client sono coerenti con questo modello e non sono stati risolti concedendo accessi al browser.
+
+Il collaudo hosted è terminato con codice 0 usando esclusivamente la chiave pubblicabile e un evento sintetico dedicato. Ha verificato configurazione, contatori inizialmente a zero, ETag/304, CORS e preflight, accesso privato senza token rifiutato, sette sessioni anonime reali, matching noto `exact=1` e `close=3`, aggiornamenti, replay idempotenti, conflitti 409, dati invalidi 400, RPC dirette inaccessibili, richiesta catalogo senza sessione aggiuntiva, cancellazione ripetibile e rifiuto 410 degli invii tardivi.
+
+La verifica SQL finale delle 23:32:46 UTC conferma: **evento pubblico draft, raccolta e catalogo disabilitati, zero risposte, zero richieste, versione aggregati 0**. L'evento di collaudo è stato chiuso: zero risposte e zero ricevute contenenti vecchie selezioni. Restano soltanto una richiesta catalogo sintetica `.invalid`, sette tombstone e i relativi utenti anonimi tracciati, soggetti alla retention di un giorno del test. Nessun contatto reale è stato usato.
+
+Il processo pianificato è stato provato tramite un job temporaneo che ha chiamato realmente `bm_cleanup()` e si è rimosso dopo il successo. `cron.job_run_details` registra `succeeded` dalle 23:28:00.023622 alle 23:28:00.034411 UTC; la successiva lettura di `cron.job` mostra solo il job orario previsto. Questa prova dimostra l'esecuzione dello scheduler, non attesta ancora un ripristino da backup o la scadenza futura dei record del collaudo.
+
+La quota Auth osservata in dashboard è ancora **30 nuovi utenti anonimi/ora/IP**. Serve conoscere affluenza prevista e uso del Wi-Fi condiviso per dimensionarla e provarla. Non è stato attivato CAPTCHA perché il frontend attuale non implementa quel percorso.
 
 ### Dati di pubblicazione e catalogo
 
@@ -54,12 +73,12 @@ Da confermare con il responsabile: titolare e recapito reali per l'informativa, 
 
 ### Verifica finale e pubblicazione
 
-Prima della raccolta pubblica: prova hosted su ambiente di test, prova su telefoni reali, quota Auth sul Wi-Fi condiviso, procedura di conservazione/ripristino e configurazione GitHub Pages. Il nuovo sorgente Vite richiede **Pages Source: GitHub Actions prima del merge**; pubblicare soltanto `dist/` compilato. Le istruzioni sono in [RELEASE.md](RELEASE.md) e i criteri in [ACCEPTANCE.md](ACCEPTANCE.md).
+Prima della raccolta pubblica restano: dati reali dell'informativa e del catalogo, prova su telefoni reali, quota Auth sul Wi-Fi condiviso, prova di ripristino e configurazione GitHub Pages. Il nuovo sorgente Vite richiede **Pages Source: GitHub Actions prima del merge**; pubblicare soltanto `dist/` compilato. Il connettore GitHub gestisce codice/PR/CI ma non espone le impostazioni Pages o le variabili repository; la dashboard richiede una sessione GitHub autenticata per completarle. Le istruzioni sono in [RELEASE.md](RELEASE.md) e i criteri in [ACCEPTANCE.md](ACCEPTANCE.md).
 
 ## Ripresa del lavoro
 
-1. Completare verifica del costo e creazione del progetto Supabase nell'organizzazione confermata, poi configurazione e prove hosted.
-2. Inserire i dati approvati dell'evento e dell'informativa; verificare il percorso catalogo.
-3. Completare le prove sui telefoni e pubblicare la versione verificata mediante il workflow previsto.
+1. Inserire titolare, recapito e informativa approvati, confermare retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete.
+2. Configurare Pages su GitHub Actions e le quattro variabili pubbliche del repository, lasciando il gate di deploy disabilitato finché il candidato non è pronto.
+3. Completare le prove sui telefoni e di ripristino; pubblicare la versione verificata mediante il workflow previsto. Una pagina pre-evento può essere pubblicata in draft dopo aver completato i dati richiesti dal gate.
 
 Questo registro va aggiornato con commit remoto, pull request, run CI e prove effettive quando le dipendenze vengono risolte.

@@ -1,5 +1,6 @@
--- Run in the dedicated Supabase project after reviewing retention.
--- Kept outside the portable migration because pg_cron is a platform extension.
+-- Operator repair/reinstallation of the hosted migration's named job.
+-- Normally installed by 20261006232718_big_match_retention_schedule.sql.
+-- pg_cron is a hosted platform extension, separate from portable PGlite tests.
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 SELECT cron.schedule(
   'big-match-retention',

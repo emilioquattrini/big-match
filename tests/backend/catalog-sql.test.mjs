@@ -92,7 +92,7 @@ describe('generated catalogue SQL on actual PostgreSQL', {concurrency: false}, (
   before(async () => {
     db = new PGlite();
     await db.exec('CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY, is_anonymous boolean NOT NULL DEFAULT true);');
-    await db.exec(await readFile(new URL('../../supabase/migrations/202610060001_big_match.sql', import.meta.url), 'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261006232008_big_match.sql', import.meta.url), 'utf8'));
     await db.exec(await readFile(new URL('../../supabase/seed.sql', import.meta.url), 'utf8'));
   });
   after(async () => { await db.close(); });

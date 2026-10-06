@@ -1,13 +1,15 @@
 # BIG MATCH backend
 
-Implemented for the confirmed first release: **13 original cards, visitors on their own phones, optional catalogue requests, no newsletter**. No external project, credentials or live data were created while writing these files.
+Implemented for the confirmed first release: **13 original cards, visitors on their own phones, optional catalogue requests, no newsletter**. The dedicated hosted deployment and its dated verification evidence are recorded in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). Production collection remains disabled until the actual event and privacy configuration are complete.
 
 ## Files and verification
 
-- **supabase/migrations/202610060001_big_match.sql**: schema, private tables, service-only RPCs, matching, deletion, limits and retention.
+- **supabase/migrations/20261006232008_big_match.sql**: schema, private tables, service-only RPCs, matching, deletion, limits and retention.
+- **supabase/migrations/20261006232609_big_match_retention_indexes.sql**: indexes used by actor cleanup and catalogue receipt cascades.
+- **supabase/migrations/20261006232718_big_match_retention_schedule.sql**: hosted `pg_cron` installation and hourly cleanup schedule.
 - **supabase/seed.sql**: original catalogue and the big-2026 event in draft, with zero responses and contacts disabled. Re-running never resets an existing event.
 - **supabase/functions/big-match/**: HTTP handler, Deno entrypoint and independent TypeScript configuration.
-- **supabase/ops/install-retention.sql**: hosted installation of the hourly retention job.
+- **supabase/ops/install-retention.sql**: idempotent operator repair/reinstallation of the same hourly job; normally installed by the hosted migration.
 - **tests/backend/**: database tests and HTTP handler integration tests.
 - **tests/hosted/smoke.mjs**: manually invoked hosted gateway/Auth verification with an isolated synthetic event; never included in automatic test globs.
 
@@ -18,7 +20,7 @@ node --test tests/backend/*.test.mjs
 npx tsc --project supabase/functions/big-match/tsconfig.json --noEmit
 ~~~
 
-The tests execute the migration on PostgreSQL 18 through PGlite: SQL, constraints, functions, transactions, roles and RLS are real. The Edge test transport simulates Supabase Auth, while RPCs reach that database. PGlite queues a single connection; the 100-request replay test demonstrates database idempotence, not hosted multi-connection throughput. Real Auth, the Supabase gateway, venue network and scheduled-job execution still need deployment verification.
+The tests execute the portable application migration on PostgreSQL 18 through PGlite: SQL, constraints, functions, transactions, roles and RLS are real. The Edge test transport simulates Supabase Auth, while RPCs reach that database. PGlite queues a single connection; the 100-request replay test demonstrates database idempotence, not hosted multi-connection throughput. The `pg_cron` migration is specific to hosted Supabase and is verified on that service. Real Auth, gateway and scheduler checks are separate from these portable tests; see the deployment record for completed checks and remaining venue/device work.
 
 ### Manual hosted smoke test
 
@@ -157,7 +159,7 @@ The 30-day default is a configuration proposal, not a legal deadline. At event e
 
 Unrelated Auth users are not deleted. A signup that never reaches a private app operation is not tracked; inspect unused expired anonymous accounts separately if signup abuse becomes a problem in this dedicated project.
 
-Install the hourly job with supabase/ops/install-retention.sql and verify its first run in cron.job_run_details. The script uses the hosted pg_cron extension and is not executed by portable PGlite tests. Code existing in Git does not prove the hosted scheduler is active.
+The hosted migration installs `big-match-retention` with schedule `17 * * * *` (minute 17 of each UTC hour). The operator script supabase/ops/install-retention.sql can recreate the same named job. Verify scheduler execution in cron.job_run_details; the script uses the hosted pg_cron extension and is not executed by portable PGlite tests. Code existing in Git does not prove the hosted scheduler is active.
 
 Backups and provider logs have separate retention. Test restoration in the separate project and reapply deletion/retention before reopening restored data. Keep backups, catalogue exports and secret files out of this public repository. Monitor error/status/operation codes without logging bodies, names, emails, JWTs, keys or stack traces.
 

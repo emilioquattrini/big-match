@@ -58,7 +58,7 @@ describe('Edge transport + real PostgreSQL RPC integration (Auth service mocked)
   before(async()=>{
     db=new PGlite();
     await db.exec('CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY,is_anonymous boolean DEFAULT true);');
-    await db.exec(await readFile(new URL('../../supabase/migrations/202610060001_big_match.sql',import.meta.url),'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261006232008_big_match.sql',import.meta.url),'utf8'));
     await db.exec(await readFile(new URL('../../supabase/seed.sql',import.meta.url),'utf8'));
     await db.exec("INSERT INTO big_match.events(slug,title,question,deck_version,starts_at,ends_at) VALUES('test-edge','Edge test','Choose 3','impersonae-v1',now()-interval '1 day',now()+interval '1 day')");
     await db.exec("INSERT INTO big_match.event_cards SELECT id,deck_version,n,true FROM big_match.events CROSS JOIN generate_series(1,13)n WHERE slug='test-edge'");

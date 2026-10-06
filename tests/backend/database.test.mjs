@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 
 let db;
-const migration = new URL('../../supabase/migrations/202610060001_big_match.sql', import.meta.url);
+const migration = new URL('../../supabase/migrations/20261006232008_big_match.sql', import.meta.url);
 const seed = new URL('../../supabase/seed.sql', import.meta.url);
 
 async function rpc(name, args) {

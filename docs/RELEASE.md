@@ -1,6 +1,6 @@
 # BIG MATCH — sviluppo, verifica e rilascio
 
-Guida operativa aggiornata il 6 ottobre 2026. Il codice comprende frontend, API, migrazione, test e pipeline. La presenza di questi file **non significa che il nuovo backend o la nuova versione siano già pubblicati**. L'esito del rilascio va registrato con commit, run CI e prove sul servizio configurato.
+Guida operativa aggiornata il 7 ottobre 2026. Il codice comprende frontend, API, migrazioni, test e pipeline. Il backend dedicato è stato installato e collaudato; la nuova versione frontend e la raccolta pubblica restano da rilasciare. Lo stato effettivo, il progetto e le prove eseguite sono registrati in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
 
 Il perimetro corrente è: 13 carte originali, telefono personale del visitatore, una risposta modificabile per sessione del browser, risultati e mappa aggregati, Story PNG, link di composizione e richiesta facoltativa del catalogo. Non c'è un login da compilare. Il servizio crea una sessione anonima tecnica quando serve una prima operazione privata. Il catalogo viene evaso manualmente dallo studio; il form non dichiara un'email già inviata. Kiosk multiutente e pannello amministrativo non sono implementati.
 
