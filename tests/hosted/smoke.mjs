@@ -16,6 +16,8 @@
  * It deletes its responses and signs out in finally, also on assertion failure.
  * The synthetic contact and deletion tombstones remain until normal retention;
  * the hourly cleanup also removes app-tracked anonymous Auth users when due.
+ * A signup committed before a lost response can leave an untracked anonymous
+ * user; inspect recent anonymous creations in the dedicated project in that case.
  * A failed network cleanup is reported and must be inspected by the operator.
  * No load/performance or device/browser compatibility claim follows from this.
  */
@@ -138,7 +140,7 @@ export async function runSmoke(env = process.env) {
       });
       const signed = await client.auth.signInAnonymously();
       check(!signed.error && signed.data.session?.access_token && signed.data.user?.is_anonymous === true,
-        'Anonymous Auth did not create a session; check hosted enablement, CAPTCHA and rate limits.');
+        'Anonymous Auth did not return a usable session; check enablement, CAPTCHA and limits. An interrupted signup may require inspection of recent anonymous Auth creations in the dedicated project.');
       const actor = {client, token:signed.data.session.access_token, requestId:randomUUID(), deleteId:randomUUID(), erased:false};
       actors.push(actor);
       actor.body = {cardIds, requestId:actor.requestId, expectedRevision:0};
@@ -179,7 +181,8 @@ export async function runSmoke(env = process.env) {
     await request('/contact', {method:'POST',body:{...contact,requestId:randomUUID(),privacyVersion:'obsolete'},status:409});
     pass('browser RPC segregation and public catalogue request with no added Auth session');
 
-    await request('/me', {method:'DELETE',token:owner.token,body:{requestId:owner.deleteId}});
+    const deletion = await request('/me', {method:'DELETE',token:owner.token,body:{requestId:owner.deleteId}});
+    check(deletion.value?.deleted === true, 'Owner deletion was not acknowledged.');
     owner.erased = true;
     await request('/me', {method:'DELETE',token:owner.token,body:{requestId:owner.deleteId}});
     await request('/me', {token:owner.token,status:410});
@@ -189,15 +192,18 @@ export async function runSmoke(env = process.env) {
   } finally {
     for (const actor of actors) {
       if (!actor.erased) {
-        try { await request('/me', {method:'DELETE',token:actor.token,body:{requestId:actor.deleteId}}); actor.erased = true; }
+        try {
+          const erased = await request('/me', {method:'DELETE',token:actor.token,body:{requestId:actor.deleteId}});
+          check(erased.value?.deleted === true, 'Deletion was not acknowledged.'); actor.erased = true;
+        }
         catch { cleanupFailed = true; }
       }
       try { const result = await actor.client.auth.signOut({scope:'local'}); if (result.error) cleanupFailed = true; }
       catch { cleanupFailed = true; }
     }
     if (actors.length) {
-      if (cleanupFailed) process.stderr.write('Cleanup incomplete: inspect only this synthetic event and its app-tracked test Auth users; no credentials were logged.\n');
-      else process.stdout.write('CLEANUP all created responses erased and test sessions signed out; synthetic contact/tombstones use normal one-day retention.\n');
+      if (cleanupFailed) process.stderr.write('Cleanup incomplete: inspect this synthetic event and recent anonymous Auth creations in the dedicated project, including any interrupted signup; no credentials were logged.\n');
+      else process.stdout.write('CLEANUP deletion acknowledged for all known test responses and sessions signed out; synthetic contact/tombstones use normal one-day retention.\n');
     }
   }
   check(!cleanupFailed, 'Some hosted test cleanup requests failed.');
