@@ -9,7 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SLUG = /^[a-z0-9][a-z0-9-]{0,79}$/;
-const IMAGE = /^cards\/[a-z0-9][a-z0-9._-]*\.(jpg|jpeg|png|webp)$/;
+// Match the Story renderer's accepted local paths so a validated import can export.
+const IMAGE = /^cards\/[a-z0-9]+(?:-[a-z0-9]+)*\.(jpg|jpeg|png|webp)$/;
 const CONTROL = /[\u0000-\u001f\u007f]/;
 const MANIFEST_LIMIT = 1024 * 1024;
 const ASSET_LIMIT = 32 * 1024 * 1024;
@@ -31,7 +32,7 @@ export function validateManifest(value) {
     assert(typeof card.name === 'string' && card.name.trim() === card.name && card.name.length >= 1 && card.name.length <= 80 && !CONTROL.test(card.name), label + ': name must contain 1–80 printable characters without surrounding whitespace.');
     const foldedName = card.name.normalize('NFC').toLowerCase();
     assert(!names.has(foldedName), label + ': duplicate card name.'); names.add(foldedName);
-    assert(typeof card.image === 'string' && card.image.length <= 240 && IMAGE.test(card.image) && !images.has(card.image), label + ': image must be a unique local cards/*.jpg, jpeg, png or webp path.'); images.add(card.image);
+    assert(typeof card.image === 'string' && card.image.length <= 240 && IMAGE.test(card.image) && !images.has(card.image), label + ': image must be a unique local cards/name-with-hyphens.jpg, jpeg, png or webp path.'); images.add(card.image);
     assert(typeof card.alt === 'string' && card.alt.trim().length > 0 && card.alt.length <= 1000 && !CONTROL.test(card.alt), label + ': a printable, nonempty alt description is required.');
     return Object.freeze({
       id: card.id, slug: card.slug, name: card.name, image: card.image,

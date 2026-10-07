@@ -1,18 +1,20 @@
 import type { BrowserContext, Route } from '@playwright/test';
-import type { EventConfig, MindSnapshot, ParticipationAck, PendingParticipation } from '../../src/types.ts';
+import { readFileSync } from 'node:fs';
+import type { Catalogue, EventConfig, MindSnapshot, ParticipationAck, PendingParticipation } from '../../src/types.ts';
 
 export const FIXTURE_ORIGIN = 'https://big-match-test.supabase.co';
 export const FIXTURE_KEY = 'sb_publishable_e2e_fixture_only_000000000000';
 const actorId = '11111111-1111-4111-8111-111111111111';
 const participationId = '22222222-2222-4222-8222-222222222222';
 const timestamp = '2026-10-06T12:00:00Z';
+const catalogue = JSON.parse(readFileSync(new URL('../../catalog/impersonae-v1.json', import.meta.url), 'utf8')) as Catalogue;
 
 /** Browser transport fixture, never a database substitute. SQL invariants have separate tests. */
 export class EventFixture {
   config: EventConfig = {
     slug: 'big-2026', title: 'BIG MATCH — Browser fixture',
-    question: 'What does the future of design look like?', deckVersion: 'impersonae-v1',
-    status: 'open', activeCardIds: Array.from({ length: 13 }, (_, i) => i + 1),
+    question: 'What does the future of design look like?', deckVersion: catalogue.deckVersion,
+    status: 'open', activeCardIds: catalogue.cards.map(card => card.id),
     contactEnabled: false, privacyVersion: 'fixture-v1',
     privacyNotice: 'Test fixture: technical participation and optional catalogue requests are separate.',
     controllerName: 'Test Controller', controllerEmail: 'controller@example.invalid', retentionDays: 60,

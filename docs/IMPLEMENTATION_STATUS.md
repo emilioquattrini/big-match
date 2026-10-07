@@ -90,8 +90,13 @@ Alle 09:14 Europe/Rome l'utente ha confermato anche l'inserimento delle cinque v
 
 ## Ripresa del lavoro
 
-1. Completare la bozza dell'informativa e preparare il PDF/servizio di invio del catalogo; dimensionare Auth con i dati di affluenza/rete. Titolare, recapito, retention di 30 giorni e operatrice Chiara sono confermati.
-2. Completare le prove sui telefoni fisici, sulla rete condivisa e di ripristino. La pubblicazione dell'anteprima e la verifica delle variabili sono concluse.
-3. Sostituire la notice pre-evento e aprire la raccolta soltanto dopo aver completato i prerequisiti applicabili. Le future pubblicazioni continuano a richiedere l'avvio esplicito del workflow, la verifica del ramo/tag, la CI e il controllo del backend.
+Il 7 ottobre alle 09:54 Europe/Rome l'utente ha comunicato che il PDF non è ancora pronto e che devono essere aggiunte **almeno altre 20 carte**. La priorità passa all'ampliamento del mazzo ad almeno 33 carte. Le immagini e i nomi nuovi non sono ancora stati ricevuti: il sito e il manifest contengono tuttora le 13 carte originali. Le istruzioni per il materiale sono in [CATALOG.md](CATALOG.md#receiving-the-next-cards).
+
+I controlli del catalogo corrente ora seguono il manifest completo, conservando le prove esplicite delle 13 identità originarie e delle combinazioni storiche fino a 52 carte. Le fixture SQL del seed restano distinte dalle carte reali aggiunte. L'importatore rifiuta anche i nomi file incompatibili con il renderer PNG. Le verifiche locali della preparazione hanno superato TypeScript e 17 test domain/importazione; nessuna nuova immagine o modifica al database è inclusa.
+
+1. Ricevere le nuove immagini con i nomi esatti, verificarle e aggiungerle con ID successivi. Eseguire il collaudo del catalogo completo, pubblicare prima il frontend ampliato e aggiornare poi il mazzo dell'evento draft.
+2. Completare la bozza dell'informativa e preparare il PDF/servizio di invio del catalogo quando il materiale sarà pronto; dimensionare Auth con i dati di affluenza/rete. Titolare, recapito, retention di 30 giorni e operatrice Chiara sono confermati.
+3. Completare le prove sui telefoni fisici, sulla rete condivisa e di ripristino. La pubblicazione dell'anteprima e la verifica delle variabili sono concluse; i nuovi artwork richiederanno il collaudo del mazzo ampliato.
+4. Sostituire la notice pre-evento e aprire la raccolta soltanto dopo aver completato i prerequisiti applicabili. Le future pubblicazioni continuano a richiedere l'avvio esplicito del workflow, la verifica del ramo/tag, la CI e il controllo del backend.
 
 Questo registro va aggiornato con commit remoto, pull request, run CI e prove effettive quando le dipendenze vengono risolte.

@@ -122,20 +122,34 @@ test('mind aggregates contain only global counts and preserve the supplied snaps
   assert.throws(() => computeMind(participants, 1, 'not a date'));
 });
 
-test('catalogue retains the original 13 names, stable IDs and actual app-relative assets', () => {
+test('catalogue retains the original 13 identities and validates assets across appended cards', () => {
   const catalogue = JSON.parse(readFileSync(new URL('../catalog/impersonae-v1.json', import.meta.url), 'utf8')) as Catalogue;
   assert.equal(catalogue.deckVersion, deck);
-  assert.deepEqual(catalogue.cards.map(card => card.id), Array.from(validIds));
-  assert.deepEqual(catalogue.cards.map(card => card.name), ['Cyborg', 'Diva', 'Exotic', 'Hypnotic', 'Juggler', 'Loyal', 'Mother', 'Nocturnal', 'Nostalgia', 'Oceanic', 'Otherthinker', 'Chimera', 'Emotional']);
-  assert.equal(new Set(catalogue.cards.map(card => card.slug)).size, 13);
-  for (const card of catalogue.cards) {
-    assert.equal(card.ordinal, card.id);
+  const originalCards = catalogue.cards.filter(card => validIds.has(card.id)).sort((a, b) => a.id - b.id);
+  assert.deepEqual(originalCards.map(card => card.id), Array.from(validIds));
+  assert.deepEqual(originalCards.map(card => card.name), ['Cyborg', 'Diva', 'Exotic', 'Hypnotic', 'Juggler', 'Loyal', 'Mother', 'Nocturnal', 'Nostalgia', 'Oceanic', 'Otherthinker', 'Chimera', 'Emotional']);
+  for (const card of originalCards) {
     assert.equal(card.slug, card.name.toLowerCase());
     assert.equal(card.image, `cards/${card.slug}.jpg`);
+  }
+  assert.equal(new Set(catalogue.cards.map(card => card.id)).size, catalogue.cards.length);
+  assert.equal(new Set(catalogue.cards.map(card => card.slug)).size, catalogue.cards.length);
+  assert.equal(new Set(catalogue.cards.map(card => card.image)).size, catalogue.cards.length);
+  for (const card of catalogue.cards) {
+    assert.ok(Number.isInteger(card.id) && card.id >= 1 && card.id <= 1000);
+    assert.equal(card.ordinal, card.id);
     assert.ok(card.alt.includes(card.name));
+    assert.match(card.image, /^cards\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|jpeg|png|webp)$/);
     const bytes = readFileSync(new URL(`../public/${card.image}`, import.meta.url));
-    assert.equal(bytes.subarray(0, 2).toString('hex'), 'ffd8');
-    assert.equal(bytes.subarray(-2).toString('hex'), 'ffd9');
+    if (/\.jpe?g$/.test(card.image)) {
+      assert.equal(bytes.subarray(0, 2).toString('hex'), 'ffd8');
+      assert.equal(bytes.subarray(-2).toString('hex'), 'ffd9');
+    } else if (card.image.endsWith('.png')) {
+      assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    } else {
+      assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+      assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+    }
   }
   const logo = readFileSync(new URL('../public/brand/impersonae.png', import.meta.url));
   assert.equal(logo.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
