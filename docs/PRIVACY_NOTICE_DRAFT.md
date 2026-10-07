@@ -2,6 +2,8 @@
 
 **DRAFT — 7 ottobre 2026.** Documento da completare e verificare con il titolare prima della pubblicazione. Non è stato inserito nel campo pubblico `privacy_notice` e non apre la raccolta dei dati.
 
+Per la fase con evento draft e raccolta disabilitata è disponibile un'[informativa specifica pre-evento](PRIVACY_PRE_EVENT.md). Il presente documento riguarda l'apertura delle partecipazioni e delle richieste catalogo, non viene sostituito dall'informativa dell'anteprima.
+
 Il titolare indicato dall'utente è **Chiara Zhu**, con recapito **chiara.czhu@gmail.com**, confermato il 7 ottobre 2026 e registrato nella configurazione dell'evento `big-2026`. Nella stessa sessione l'utente ha confermato **30 giorni di conservazione** e **Chiara come responsabile dell'evasione manuale del catalogo**. Le regole temporali distinte sono riportate nel testo e nella tabella sotto.
 
 ## Decisioni da completare

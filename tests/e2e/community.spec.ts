@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { EventFixture } from './api-fixture.ts';
+import { EventFixture, FIXTURE_ORIGIN } from './api-fixture.ts';
 import { writeFile } from 'node:fs/promises';
 
 // HTTP contract tests require routable requests. Worker lifecycle is tested separately.
@@ -44,6 +44,54 @@ test('a genuine zero response count becomes one private browser response', async
   expect(fixture.authSignups).toBe(1);
   expect(fixture.putBodies).toHaveLength(1);
   await expect(page.locator('#contact-section')).not.toBeVisible();
+});
+
+test('a new visitor in draft creates a local downloadable composition without joining the event', async ({ page }, testInfo) => {
+  fixture.config.status = 'draft';
+  fixture.config.privacyVersion = 'pre-event-2026-10-07-v1';
+  fixture.config.privacyNotice = 'Pre-event preview\nYour card selection stays in this browser. Community participation and catalogue requests are not open.';
+  const requests: Array<{ method: string; path: string }> = [];
+  page.on('request', request => {
+    const url = new URL(request.url());
+    if (url.origin === FIXTURE_ORIGIN) requests.push({ method: request.method(), path: url.pathname });
+  });
+
+  await page.goto('./');
+  await expect(page.locator('#event-notice')).toContainText('The event is not open yet.');
+  await choose(page);
+  await expect(page.locator('#save-status')).toHaveText('The event is not open yet. Your composition is ready.');
+  await expect(page.locator('#matchnumber')).toHaveText('BIG MATCH #0001');
+  await expect(page.locator('#trio img')).toHaveCount(3);
+  await expect(page.locator('#contact-section')).toBeHidden();
+  await expect(page.locator('#download')).toBeEnabled();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#download').click()]);
+  expect(download.suggestedFilename()).toBe('BIG-MATCH-0001.png');
+  expect(await download.failure()).toBeNull();
+
+  await page.locator('#result').getByRole('button', { name: 'Privacy & your data' }).click();
+  const privacy = page.locator('#privacy');
+  await expect(privacy).toBeVisible();
+  await expect(privacy.locator('.notice-text')).toHaveText(fixture.config.privacyNotice);
+  await expect(privacy).toContainText('Notice version: pre-event-2026-10-07-v1.');
+  await expect(privacy.getByRole('heading', { name: 'Your browser session' })).toHaveCount(0);
+  await expect(privacy).not.toContainText('Catalogue requests are optional and stored separately from card choices.');
+  for (const [name, href] of [
+    ['GitHub privacy statement (opens in a new tab)', 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement'],
+    ['Supabase privacy policy (opens in a new tab)', 'https://supabase.com/privacy'],
+  ]) {
+    const link = privacy.getByRole('link', { name, exact: true });
+    await expect(link).toHaveAttribute('href', href);
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  }
+
+  await testInfo.attach('Pre-event request log', { body: JSON.stringify(requests, null, 2), contentType: 'application/json' });
+  expect(requests).toContainEqual({ method: 'GET', path: '/functions/v1/big-match/events/big-2026' });
+  expect(requests.filter(request => request.path.startsWith('/auth/') || request.path.endsWith('/me') || request.path.endsWith('/contact'))).toEqual([]);
+  expect(fixture.authSignups).toBe(0);
+  expect(fixture.committedWrites).toBe(0);
+  expect(fixture.putBodies).toHaveLength(0);
+  expect(fixture.contactBodies).toHaveLength(0);
 });
 
 test('lost acknowledgement retains the same request ID and revision when retried', async ({ page }) => {
