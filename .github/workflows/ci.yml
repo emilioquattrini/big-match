@@ -1,0 +1,74 @@
+name: Validate BIG MATCH
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'feat/**', 'fix/**']
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_APP_BASE: /big-match/
+      VITE_EVENT_SLUG: big-2026
+      VITE_APP_URL: http://127.0.0.1:4175/big-match/
+      # Inert public fixture values. Browser routes mock this exact host and block all others.
+      VITE_SUPABASE_URL: https://big-match-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_e2e_fixture_only_000000000000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx tsc --project tests/e2e/tsconfig.json
+      - run: npx tsc --project supabase/functions/big-match/tsconfig.json --noEmit
+      - run: npm test
+      - run: npm run test:sw
+      - run: npm run build
+      - run: npm run check:release
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+      - name: Small visual evidence bundle for review
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-visuals-${{ github.sha }}
+          path: |
+            test-results/**/big-match-story-1080x1920.png
+            test-results/**/big-match-result-view.png
+            test-results/**/big-match-selection-view.png
+            test-results/**/network-diagnostics.json
+            test-results/**/error-context.md
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Browser regression evidence (local fixtures only)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-regressions-${{ github.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Reviewable fixture build (never a production artifact)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fixture-preview-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

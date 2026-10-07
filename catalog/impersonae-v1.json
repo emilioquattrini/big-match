@@ -1,0 +1,109 @@
+{
+  "deckVersion": "impersonae-v1",
+  "cards": [
+    {
+      "id": 1,
+      "slug": "cyborg",
+      "name": "Cyborg",
+      "image": "cards/cyborg.jpg",
+      "alt": "Cyborg — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 1
+    },
+    {
+      "id": 2,
+      "slug": "diva",
+      "name": "Diva",
+      "image": "cards/diva.jpg",
+      "alt": "Diva — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 2
+    },
+    {
+      "id": 3,
+      "slug": "exotic",
+      "name": "Exotic",
+      "image": "cards/exotic.jpg",
+      "alt": "Exotic — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 3
+    },
+    {
+      "id": 4,
+      "slug": "hypnotic",
+      "name": "Hypnotic",
+      "image": "cards/hypnotic.jpg",
+      "alt": "Hypnotic — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 4
+    },
+    {
+      "id": 5,
+      "slug": "juggler",
+      "name": "Juggler",
+      "image": "cards/juggler.jpg",
+      "alt": "Juggler — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 5
+    },
+    {
+      "id": 6,
+      "slug": "loyal",
+      "name": "Loyal",
+      "image": "cards/loyal.jpg",
+      "alt": "Loyal — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 6
+    },
+    {
+      "id": 7,
+      "slug": "mother",
+      "name": "Mother",
+      "image": "cards/mother.jpg",
+      "alt": "Mother — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 7
+    },
+    {
+      "id": 8,
+      "slug": "nocturnal",
+      "name": "Nocturnal",
+      "image": "cards/nocturnal.jpg",
+      "alt": "Nocturnal — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 8
+    },
+    {
+      "id": 9,
+      "slug": "nostalgia",
+      "name": "Nostalgia",
+      "image": "cards/nostalgia.jpg",
+      "alt": "Nostalgia — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 9
+    },
+    {
+      "id": 10,
+      "slug": "oceanic",
+      "name": "Oceanic",
+      "image": "cards/oceanic.jpg",
+      "alt": "Oceanic — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 10
+    },
+    {
+      "id": 11,
+      "slug": "otherthinker",
+      "name": "Otherthinker",
+      "image": "cards/otherthinker.jpg",
+      "alt": "Otherthinker — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 11
+    },
+    {
+      "id": 12,
+      "slug": "chimera",
+      "name": "Chimera",
+      "image": "cards/chimera.jpg",
+      "alt": "Chimera — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 12
+    },
+    {
+      "id": 13,
+      "slug": "emotional",
+      "name": "Emotional",
+      "image": "cards/emotional.jpg",
+      "alt": "Emotional — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 13
+    }
+  ]
+}

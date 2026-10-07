@@ -1,0 +1,20 @@
+project_id = "big-match"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173/big-match/"
+enable_anonymous_sign_ins = true
+
+[functions.big-match]
+# Public event/mind/contact routes exist. Every private route verifies /auth/v1/user.
+verify_jwt = false
