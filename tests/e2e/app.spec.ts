@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import type { Catalogue } from '../../src/types.ts';
 import { startStaticOrigin } from './static-origin.ts';
+
+const catalogue = JSON.parse(readFileSync(new URL('../../catalog/impersonae-v1.json', import.meta.url), 'utf8')) as Catalogue;
 
 async function choose(page: Page, ids = [1, 2, 3]) {
   for (const id of ids) await page.locator(`button[data-card-id="${id}"]`).click();
@@ -37,14 +41,16 @@ test('the current Pages prefix loads all cards and supports search without selec
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
-  await expect(page.locator('button[data-card-id]')).toHaveCount(13);
-  await expectCardProportions(page, '#grid .card img', 13);
+  await expect(page.locator('button[data-card-id]')).toHaveCount(catalogue.cards.length);
+  await expectCardProportions(page, '#grid .card img', catalogue.cards.length);
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await page.waitForFunction(() => navigator.serviceWorker.controller?.state === 'activated');
   await expect(page.locator('#update-notice')).toBeHidden();
   await page.locator('button[data-card-id="1"]').click();
   await page.locator('#search').fill('oCeAn');
-  await expect(page.locator('button[data-card-id]:visible')).toHaveCount(1);
+  const matchingIds = catalogue.cards.filter(card => card.name.toLocaleLowerCase().includes('ocean')).map(card => String(card.id));
+  await expect(page.locator('button[data-card-id]:visible')).toHaveCount(matchingIds.length);
+  await expect.poll(() => page.locator('button[data-card-id]:visible').evaluateAll(buttons => buttons.map(button => button.getAttribute('data-card-id')))).toEqual(matchingIds);
   await expect(page.locator('button[data-card-id="10"]')).toBeVisible();
   await page.locator('#search').fill('');
   await expect(page.locator('button[data-card-id="1"]')).toHaveAttribute('aria-pressed', 'true');
@@ -184,7 +190,7 @@ test('preloaded shell survives an unavailable network origin without claiming a 
     const recovered = await page.reload();
     expect(recovered?.status()).toBe(200);
     expect(recovered?.fromServiceWorker()).toBe(true);
-    await expect(page.locator('button[data-card-id]')).toHaveCount(13);
+    await expect(page.locator('button[data-card-id]')).toHaveCount(catalogue.cards.length);
     await choose(page);
     await expect(page.locator('#download')).toBeEnabled();
     await expect(page.locator('#export-status')).toContainText('Your Story is ready');

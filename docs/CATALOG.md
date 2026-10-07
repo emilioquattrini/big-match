@@ -59,6 +59,22 @@ To extend the catalogue:
 
 ## Generate the database catalogue import
 
+### Receiving the next cards
+
+On 7 October 2026 the user requested **at least 20 additional cards**, taking the planned event deck to **at least 33**. The PDF catalogue is not ready and catalogue requests remain disabled. These are separate deliverables: adding card artwork does not require the PDF.
+
+The current app still contains the 13 supplied originals. Receive new artwork before adding catalogue records; do not add placeholder cards to the public deck.
+
+For the next batch, supply one complete card image per file, ideally together in a ZIP archive or a shared Drive folder. JPEG, PNG and WebP are supported. Each image needs its exact English display name. The filename can contain that name, or an accompanying list can map filenames to names. An ordering list is optional; otherwise retain the current 13 cards and append the new batch in an agreed, reproducible order. The user does not need to edit JSON, choose database IDs or modify GitHub settings.
+
+Use lowercase letters, digits and single hyphens for the app's final image filenames, for example `cards/dream-keeper.png`. Both the importer and the PNG renderer enforce this same path format; underscores and additional dots in the basename are rejected. The display name can retain spaces and capitalization, such as `Dream Keeper`. This is a naming example, not a new card definition.
+
+Inspect each supplied image for completeness, orientation, readability, dimensions, duplicate content and file size. Keep the original art and proportions. The app package has a 10 MiB release limit, and the service worker downloads the full asset set for offline use; assess the complete batch's size before publication. No new paid service or different application architecture is required merely to move from 13 to 33 cards.
+
+Keep existing IDs 1–13 unchanged and allocate subsequent IDs from 14 after checking the current manifest and database. Preserve `impersonae-v1` for this append-only extension. First deploy the expanded manifest and its assets, verify the public files, and only then apply the reviewed catalogue SQL to the draft event. A client with the old 13-card bundle must update before using newly enabled IDs. Existing links and selections remain valid in the compatible updated client.
+
+### Generate and review SQL
+
 The manifest is the source for both the frontend and future database imports. After appending original artwork and records, run:
 
 ```bash

@@ -10,20 +10,24 @@ import { PGlite } from '@electric-sql/pglite';
 import { generateSql, loadCatalogue, validateManifest } from '../../scripts/catalog-sql.mjs';
 
 const script = fileURLToPath(new URL('../../scripts/catalog-sql.mjs', import.meta.url));
-const original = JSON.parse(await readFile(new URL('../../catalog/impersonae-v1.json', import.meta.url), 'utf8'));
+const current = JSON.parse(await readFile(new URL('../../catalog/impersonae-v1.json', import.meta.url), 'utf8'));
+// The SQL scenarios exercise the immutable 13-card seed. Keep their synthetic
+// 14+ fixture IDs separate from any real cards appended to the shipped manifest.
+const original = { deckVersion: current.deckVersion, cards: current.cards.filter(card => card.id <= 13).sort((a, b) => a.id - b.id) };
 const clone = () => structuredClone(original);
 const extra = (id = 14) => ({ id, ordinal: id, slug: 'future-' + id, name: 'Future ' + id, image: 'cards/future-' + id + '.jpg', alt: 'Original future artwork ' + id });
 const count = async (db, table, where, values = []) => (await db.query('SELECT count(*)::int AS n FROM big_match.' + table + ' WHERE ' + where, values)).rows[0].n;
 
-it('validates all original artwork without rewriting or renumbering the manifest', async () => {
+it('validates the complete current catalogue while preserving the original seed identities', async () => {
   const catalogue = await loadCatalogue();
   assert.equal(catalogue.deckVersion, 'impersonae-v1');
-  assert.equal(catalogue.cards.length, 13);
-  assert.deepEqual(catalogue.cards.map(c => c.id), Array.from({ length: 13 }, (_, i) => i + 1));
+  assert.equal(catalogue.cards.length, current.cards.length);
+  assert.deepEqual(catalogue.cards.map(c => c.id), current.cards.map(c => c.id));
+  assert.deepEqual(original.cards.map(c => c.id), Array.from({ length: 13 }, (_, i) => i + 1));
   assert.equal(catalogue.cards[10].name, 'Otherthinker');
-  const shuffled = clone(); shuffled.cards.reverse();
+  const shuffled = structuredClone(current); shuffled.cards.reverse();
   assert.deepEqual(validateManifest(shuffled).cards, catalogue.cards);
-  assert.equal(shuffled.cards[0].id, 13, 'validation does not mutate the source');
+  assert.equal(shuffled.cards[0].id, current.cards.at(-1).id, 'validation does not mutate the source');
 });
 
 it('rejects malformed IDs, identity duplicates, unsafe paths and missing descriptions', () => {
@@ -38,6 +42,8 @@ it('rejects malformed IDs, identity duplicates, unsafe paths and missing descrip
     c => { c.cards[0].name = 'Bad\u0000name'; },
     c => { c.cards[0].image = 'cards/../../secret.jpg'; },
     c => { c.cards[0].image = 'https://example.com/card.jpg'; },
+    c => { c.cards[0].image = 'cards/new_card.jpg'; },
+    c => { c.cards[0].image = 'cards/new.card.jpg'; },
     c => { c.cards[0].alt = ''; },
     c => { c.deckVersion = 'invalid/version'; },
   ];
