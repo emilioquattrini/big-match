@@ -2,14 +2,14 @@
 
 **DRAFT — 7 ottobre 2026.** Documento da completare e verificare con il titolare prima della pubblicazione. Non è stato inserito nel campo pubblico `privacy_notice` e non apre la raccolta dei dati.
 
-Il titolare indicato dall'utente è **Chiara Zhu**, già registrato nella configurazione dell'evento `big-2026`. Il recapito resta da confermare e in questa bozza è rappresentato da `[CONTACT_EMAIL_PENDING_CONFIRMATION]`. Il periodo di 30 giorni corrisponde alla configurazione applicativa attuale e resta una proposta da confermare.
+Il titolare indicato dall'utente è **Chiara Zhu**, con recapito **chiara.czhu@gmail.com**, confermato il 7 ottobre 2026 e registrato nella configurazione dell'evento `big-2026`. Il periodo di 30 giorni corrisponde alla configurazione applicativa attuale e resta una proposta da confermare.
 
 ## Decisioni da completare
 
 - **Base giuridica:** il testo propone l'art. 6(1)(b) GDPR per la partecipazione e il catalogo effettivamente richiesti, e l'art. 6(1)(f) per le sole protezioni tecniche descritte. Prima di adottarlo, verificare i presupposti di un rapporto contrattuale valido, la necessità dei trattamenti e il bilanciamento per le protezioni tecniche. Queste valutazioni non risultano già approvate. La mera richiesta di un servizio non dimostra, da sola, tutti i presupposti dell'art. 6(1)(b). [1][2]
 - **Conservazione:** confermare i 30 giorni e registrare i periodi effettivi di log e backup dei servizi. La cancellazione applicativa riguarda il database attivo; non equivale alla rimozione immediata di ogni copia di backup.
 - **Evasione del catalogo:** identificare chi gestisce le richieste e quale servizio email usa; stabilire conservazione e cancellazione delle eventuali esportazioni e delle copie nella posta. La pulizia SQL non cancella CSV scaricati o messaggi inviati manualmente.
-- **Recapito e versione:** confermare l'indirizzo del titolare e assegnare `privacy_version` soltanto al testo definitivo. Non pubblicare il placeholder.
+- **Versione:** il recapito è confermato; assegnare `privacy_version` soltanto al testo definitivo.
 
 Il checkbox del catalogo documenta la richiesta e la presa visione dell'informativa. La partecipazione si salva al terzo tap e non registra un consenso separato. Se si decidesse di basare la partecipazione sul consenso, occorrerebbe adeguare anche il flusso e la sua registrazione; cambiare soltanto il testo non sarebbe sufficiente.
 
@@ -48,7 +48,7 @@ Providers may process data outside the European Economic Area. Their published t
 
 Your rights
 
-Contact [CONTACT_EMAIL_PENDING_CONFIRMATION] to request access, correction, deletion or restriction of your data, and, where applicable, portability or to object to processing based on legitimate interests. Catalogue requests must be removed separately from your participation. If you have lost the browser session, we may need information that allows us to locate your response. You may also complain to the Italian data protection authority, Garante per la protezione dei dati personali, or another competent supervisory authority.
+Contact chiara.czhu@gmail.com to request access, correction, deletion or restriction of your data, and, where applicable, portability or to object to processing based on legitimate interests. Catalogue requests must be removed separately from your participation. If you have lost the browser session, we may need information that allows us to locate your response. You may also complain to the Italian data protection authority, Garante per la protezione dei dati personali, or another competent supervisory authority.
 ```
 
 ## Corrispondenza con l'applicazione

@@ -7,7 +7,7 @@ Registro aggiornato il 7 ottobre 2026 (Europe/Rome). Il codice è implementato e
 - Repository: `emilioquattrini/big-match`.
 - Commit di partenza: `f15e6aa53c266f1a793205245a4e92e8eda359c2`.
 - Ramo di sviluppo: [`feat/big-match-production`](https://github.com/emilioquattrini/big-match/tree/feat/big-match-production).
-- Pull request draft: [#1](https://github.com/emilioquattrini/big-match/pull/1).
+- Pull request: [#1](https://github.com/emilioquattrini/big-match/pull/1), con stato corrente e cronologia dell'integrazione.
 - Primo caricamento remoto: `9567df410530fdde13ccc77509cf31abe19f8811`; correzioni di focus/test: `01449c418309b33aea2ffba6eb4da344f34c8f89`; proporzioni delle carte e relative prove: `9f513be6aabb98b830417dc6a121ce2278efefcc`.
 - Perimetro confermato: 13 carte ampliabili, telefoni personali dei visitatori, richiesta facoltativa del catalogo senza newsletter.
 
@@ -28,6 +28,7 @@ Il generatore `npm run catalog:sql` prepara l'estensione del catalogo per un eve
 | CI della preparazione hosted | Superata | [Run 37541220504](https://github.com/emilioquattrini/big-match/actions/runs/37541220504), commit `9279bcf414e10bdd56ed609b4bcd59d7fc4520d1`: 56 test applicativi/SQL, 9 cache e 48 browser, senza errori, skip o retry. |
 | Build con progetto Supabase reale | Superata | 25 file, 615.792 byte, versione `ac48e8879f0cf244`; controllo locale `--production` superato. Il gate aggiuntivo `--check-backend` rileva l'informativa pubblica incompleta e impedisce il rilascio. |
 | Build della nota prima delle carte | Superata | TypeScript, build e controllo locale `--production` del 7 ottobre: 25 file, 615.849 byte, versione `7493c25c04cc33b9`. Questa verifica non pubblica il sito né completa l'informativa del backend. |
+| CI della nota prima delle carte | Superata | [Run 37581794143](https://github.com/emilioquattrini/big-match/actions/runs/37581794143), commit `2ae929668c9808af3b616f7fb18b03a4c09d0516`, conclusa il 7 ottobre alle 08:31:51 Europe/Rome. Primo tentativo, tutti i 19 passaggi riusciti, comprese le suite applicative/SQL, cache e browser. |
 | Gateway e Auth ospitati | Superati | `tests/hosted/smoke.mjs` sul progetto dedicato: 7 sessioni anonime reali, matching, revisioni, replay, autorizzazione, CORS, catalogo e cancellazione. Dettagli nella sezione Supabase. |
 | Scheduler ospitato | Superato | Esecuzione reale di `bm_cleanup()` tramite job di verifica completata il 6 ottobre alle 23:28:00 UTC. Il job temporaneo si è rimosso; quello orario resta attivo. |
 
@@ -43,7 +44,7 @@ La rifinitura successiva all'ispezione aggiunge uno sfondo rosa al logo bianco d
 
 ### GitHub: collegamento risolto
 
-Il collegamento è stato aggiornato dall'utente. Creazione del ramo, caricamento dei sorgenti e apertura della pull request sono riusciti. Il contenuto remoto è stato verificato confrontando l'hash dell'intero albero Git con quello locale; il commit del collaudo frontend finale usa l'albero `f25f685373e6d1ca7c1f34ca989191a9c4c5522f`. La pull request rimane draft e il ramo principale non è stato modificato.
+Il collegamento è stato aggiornato dall'utente. Creazione del ramo, caricamento dei sorgenti e apertura della pull request sono riusciti. Il contenuto remoto è stato verificato confrontando l'hash dell'intero albero Git con quello locale; il commit del collaudo frontend finale usa l'albero `f25f685373e6d1ca7c1f34ca989191a9c4c5522f`. La pull request registra lo stato corrente dell'integrazione. Il merge su `main` esegue la CI; la pubblicazione richiede l'avvio distinto di `pages.yml` e tutti i suoi controlli.
 
 ### Progetto Supabase: installato e collaudato
 
@@ -70,7 +71,7 @@ La quota Auth osservata in dashboard è ancora **30 nuovi utenti anonimi/ora/IP*
 
 ### Dati di pubblicazione e catalogo
 
-Il 7 ottobre l'utente ha indicato **Chiara Zhu** come titolare; il nome è stato registrato nella configurazione dell'evento `big-2026`. Il recapito deve ancora essere confermato prima di inserirlo nell'API pubblica. Testo e versione dell'informativa rimangono vuoti e la raccolta resta disabilitata. La [bozza dell'informativa](PRIVACY_NOTICE_DRAFT.md) descrive il comportamento effettivo dell'app e distingue le decisioni ancora da completare, inclusi i 30 giorni attualmente configurati e l'evasione del catalogo. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
+Il 7 ottobre l'utente ha indicato **Chiara Zhu** come titolare e confermato **chiara.czhu@gmail.com** come recapito. Entrambi sono registrati nella configurazione dell'evento `big-2026` e verificati con una lettura SQL successiva all'aggiornamento. Testo e versione dell'informativa rimangono vuoti e la raccolta resta disabilitata. La [bozza dell'informativa](PRIVACY_NOTICE_DRAFT.md) contiene il recapito confermato, descrive il comportamento effettivo dell'app e distingue le decisioni ancora da completare, inclusi i 30 giorni attualmente configurati e l'evasione del catalogo. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
 
 La nota sulla raccolta viene ora mostrata prima della griglia delle carte e spiega che la terza scelta invia la risposta quando l'evento è aperto. Il collegamento all'informativa è quindi disponibile prima dell'azione che può avviare l'invio.
 
@@ -80,7 +81,7 @@ Prima della raccolta pubblica restano: informativa e procedura catalogo definiti
 
 ## Ripresa del lavoro
 
-1. Confermare il recapito del titolare e completare la bozza dell'informativa, retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete.
+1. Completare la bozza dell'informativa, retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete. Titolare e recapito sono già confermati e configurati.
 2. Inserire le quattro variabili pubbliche del repository e `PAGES_DEPLOY_ENABLED` seguendo la guida. Il valore `true` abilita il workflow ma non avvia da solo una pubblicazione; restano l'avvio esplicito, la verifica del ramo/tag, la CI e il controllo del backend.
 3. Completare le prove sui telefoni e di ripristino; pubblicare la versione verificata mediante il workflow previsto. Una pagina pre-evento può essere pubblicata in draft dopo aver completato i dati richiesti dal gate.
 
