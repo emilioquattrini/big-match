@@ -2,13 +2,13 @@
 
 **DRAFT — 7 ottobre 2026.** Documento da completare e verificare con il titolare prima della pubblicazione. Non è stato inserito nel campo pubblico `privacy_notice` e non apre la raccolta dei dati.
 
-Il titolare indicato dall'utente è **Chiara Zhu**, con recapito **chiara.czhu@gmail.com**, confermato il 7 ottobre 2026 e registrato nella configurazione dell'evento `big-2026`. Il periodo di 30 giorni corrisponde alla configurazione applicativa attuale e resta una proposta da confermare.
+Il titolare indicato dall'utente è **Chiara Zhu**, con recapito **chiara.czhu@gmail.com**, confermato il 7 ottobre 2026 e registrato nella configurazione dell'evento `big-2026`. Nella stessa sessione l'utente ha confermato **30 giorni di conservazione** e **Chiara come responsabile dell'evasione manuale del catalogo**. Le regole temporali distinte sono riportate nel testo e nella tabella sotto.
 
 ## Decisioni da completare
 
 - **Base giuridica:** il testo propone l'art. 6(1)(b) GDPR per la partecipazione e il catalogo effettivamente richiesti, e l'art. 6(1)(f) per le sole protezioni tecniche descritte. Prima di adottarlo, verificare i presupposti di un rapporto contrattuale valido, la necessità dei trattamenti e il bilanciamento per le protezioni tecniche. Queste valutazioni non risultano già approvate. La mera richiesta di un servizio non dimostra, da sola, tutti i presupposti dell'art. 6(1)(b). [1][2]
-- **Conservazione:** confermare i 30 giorni e registrare i periodi effettivi di log e backup dei servizi. La cancellazione applicativa riguarda il database attivo; non equivale alla rimozione immediata di ogni copia di backup.
-- **Evasione del catalogo:** identificare chi gestisce le richieste e quale servizio email usa; stabilire conservazione e cancellazione delle eventuali esportazioni e delle copie nella posta. La pulizia SQL non cancella CSV scaricati o messaggi inviati manualmente.
+- **Conservazione dei fornitori:** i 30 giorni del database applicativo sono confermati. Registrare i periodi effettivi di log e backup dei servizi; la cancellazione applicativa non equivale alla rimozione immediata di ogni copia di backup.
+- **Evasione del catalogo:** Chiara gestisce le richieste manualmente. Confermare il PDF e il servizio email usato per l'invio; applicare la [procedura operativa](CATALOGUE_OPERATIONS.md) anche alle copie esportate e nella posta. La pulizia SQL non cancella CSV scaricati o messaggi inviati manualmente.
 - **Versione:** il recapito è confermato; assegnare `privacy_version` soltanto al testo definitivo.
 
 Il checkbox del catalogo documenta la richiesta e la presa visione dell'informativa. La partecipazione si salva al terzo tap e non registra un consenso separato. Se si decidesse di basare la partecipazione sul consenso, occorrerebbe adeguare anche il flusso e la sua registrazione; cambiare soltanto il testo non sarebbe sufficiente.

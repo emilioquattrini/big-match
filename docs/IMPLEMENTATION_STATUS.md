@@ -71,7 +71,7 @@ La quota Auth osservata in dashboard è ancora **30 nuovi utenti anonimi/ora/IP*
 
 ### Dati di pubblicazione e catalogo
 
-Il 7 ottobre l'utente ha indicato **Chiara Zhu** come titolare e confermato **chiara.czhu@gmail.com** come recapito. Entrambi sono registrati nella configurazione dell'evento `big-2026` e verificati con una lettura SQL successiva all'aggiornamento. Testo e versione dell'informativa rimangono vuoti e la raccolta resta disabilitata. La [bozza dell'informativa](PRIVACY_NOTICE_DRAFT.md) contiene il recapito confermato, descrive il comportamento effettivo dell'app e distingue le decisioni ancora da completare, inclusi i 30 giorni attualmente configurati e l'evasione del catalogo. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
+Il 7 ottobre l'utente ha indicato **Chiara Zhu** come titolare e confermato **chiara.czhu@gmail.com** come recapito. Entrambi sono registrati nella configurazione dell'evento `big-2026` e verificati con una lettura SQL successiva all'aggiornamento. Ha inoltre scelto **30 giorni di conservazione**, già corrispondenti alla configurazione, e **Chiara come responsabile dell'invio manuale del catalogo**. Testo e versione dell'informativa rimangono vuoti e la raccolta resta disabilitata. La [bozza dell'informativa](PRIVACY_NOTICE_DRAFT.md) e la [procedura catalogo](CATALOGUE_OPERATIONS.md) registrano queste scelte; restano il completamento del testo, il PDF da inviare e il servizio di invio. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
 
 La nota sulla raccolta viene ora mostrata prima della griglia delle carte e spiega che la terza scelta invia la risposta quando l'evento è aperto. Il collegamento all'informativa è quindi disponibile prima dell'azione che può avviare l'invio.
 
@@ -81,7 +81,7 @@ Prima della raccolta pubblica restano: informativa e procedura catalogo definiti
 
 ## Ripresa del lavoro
 
-1. Completare la bozza dell'informativa, retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete. Titolare e recapito sono già confermati e configurati.
+1. Completare la bozza dell'informativa e preparare il PDF/servizio di invio del catalogo; dimensionare Auth con i dati di affluenza/rete. Titolare, recapito, retention di 30 giorni e operatrice Chiara sono confermati.
 2. Inserire le quattro variabili pubbliche del repository e `PAGES_DEPLOY_ENABLED` seguendo la guida. Il valore `true` abilita il workflow ma non avvia da solo una pubblicazione; restano l'avvio esplicito, la verifica del ramo/tag, la CI e il controllo del backend.
 3. Completare le prove sui telefoni e di ripristino; pubblicare la versione verificata mediante il workflow previsto. Una pagina pre-evento può essere pubblicata in draft dopo aver completato i dati richiesti dal gate.
 
