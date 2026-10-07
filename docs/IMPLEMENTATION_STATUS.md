@@ -27,6 +27,7 @@ Il generatore `npm run catalog:sql` prepara l'estensione del catalogo per un eve
 | Suite browser | 48/48 superati, senza retry | [Run delle correzioni finali](https://github.com/emilioquattrini/big-match/actions/runs/37539548778), commit `c51fb3f`: 16 scenari su Chromium, Chromium mobile e WebKit. Anche i controlli del codice, i 56 test applicativi/SQL e i 9 test cache sono superati nella stessa run. |
 | CI della preparazione hosted | Superata | [Run 37541220504](https://github.com/emilioquattrini/big-match/actions/runs/37541220504), commit `9279bcf414e10bdd56ed609b4bcd59d7fc4520d1`: 56 test applicativi/SQL, 9 cache e 48 browser, senza errori, skip o retry. |
 | Build con progetto Supabase reale | Superata | 25 file, 615.792 byte, versione `ac48e8879f0cf244`; controllo locale `--production` superato. Il gate aggiuntivo `--check-backend` rileva l'informativa pubblica incompleta e impedisce il rilascio. |
+| Build della nota prima delle carte | Superata | TypeScript, build e controllo locale `--production` del 7 ottobre: 25 file, 615.849 byte, versione `7493c25c04cc33b9`. Questa verifica non pubblica il sito né completa l'informativa del backend. |
 | Gateway e Auth ospitati | Superati | `tests/hosted/smoke.mjs` sul progetto dedicato: 7 sessioni anonime reali, matching, revisioni, replay, autorizzazione, CORS, catalogo e cancellazione. Dettagli nella sezione Supabase. |
 | Scheduler ospitato | Superato | Esecuzione reale di `bm_cleanup()` tramite job di verifica completata il 6 ottobre alle 23:28:00 UTC. Il job temporaneo si è rimosso; quello orario resta attivo. |
 
@@ -69,16 +70,18 @@ La quota Auth osservata in dashboard è ancora **30 nuovi utenti anonimi/ora/IP*
 
 ### Dati di pubblicazione e catalogo
 
-Da confermare con il responsabile: titolare e recapito reali per l'informativa, testo e versione dell'informativa, periodo di conservazione, finestra di raccolta ed evasione delle richieste del catalogo. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
+Il 7 ottobre l'utente ha indicato **Chiara Zhu** come titolare; il nome è stato registrato nella configurazione dell'evento `big-2026`. Il recapito deve ancora essere confermato prima di inserirlo nell'API pubblica. Testo e versione dell'informativa rimangono vuoti e la raccolta resta disabilitata. La [bozza dell'informativa](PRIVACY_NOTICE_DRAFT.md) descrive il comportamento effettivo dell'app e distingue le decisioni ancora da completare, inclusi i 30 giorni attualmente configurati e l'evasione del catalogo. Il form registra una richiesta; non invia automaticamente email e non iscrive a una newsletter.
+
+La nota sulla raccolta viene ora mostrata prima della griglia delle carte e spiega che la terza scelta invia la risposta quando l'evento è aperto. Il collegamento all'informativa è quindi disponibile prima dell'azione che può avviare l'invio.
 
 ### Verifica finale e pubblicazione
 
-Prima della raccolta pubblica restano: dati reali dell'informativa e del catalogo, prova su telefoni reali, quota Auth sul Wi-Fi condiviso, prova di ripristino e configurazione GitHub Pages. Il nuovo sorgente Vite richiede **Pages Source: GitHub Actions prima del merge**; pubblicare soltanto `dist/` compilato. Il connettore GitHub gestisce codice/PR/CI ma non espone le impostazioni Pages o le variabili repository; la dashboard richiede una sessione GitHub autenticata per completarle. Le istruzioni sono in [RELEASE.md](RELEASE.md) e i criteri in [ACCEPTANCE.md](ACCEPTANCE.md).
+Prima della raccolta pubblica restano: informativa e procedura catalogo definitive, prova su telefoni reali, quota Auth sul Wi-Fi condiviso, prova di ripristino e completamento delle variabili GitHub. L'utente ha confermato il passaggio a **Pages Source: GitHub Actions** il 7 ottobre; la conferma è dell'utente, non una lettura API dell'impostazione. Pubblicare soltanto `dist/` compilato. Il connettore GitHub gestisce codice/PR/CI ma non espone le impostazioni Pages o le variabili repository. La [guida di configurazione](GITHUB_PAGES_SETUP.md) contiene i cinque valori esatti da inserire. Le istruzioni complete sono in [RELEASE.md](RELEASE.md) e i criteri in [ACCEPTANCE.md](ACCEPTANCE.md).
 
 ## Ripresa del lavoro
 
-1. Inserire titolare, recapito e informativa approvati, confermare retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete.
-2. Configurare Pages su GitHub Actions e le quattro variabili pubbliche del repository, lasciando il gate di deploy disabilitato finché il candidato non è pronto.
+1. Confermare il recapito del titolare e completare la bozza dell'informativa, retention ed evasione del catalogo; dimensionare Auth con i dati di affluenza/rete.
+2. Inserire le quattro variabili pubbliche del repository e `PAGES_DEPLOY_ENABLED` seguendo la guida. Il valore `true` abilita il workflow ma non avvia da solo una pubblicazione; restano l'avvio esplicito, la verifica del ramo/tag, la CI e il controllo del backend.
 3. Completare le prove sui telefoni e di ripristino; pubblicare la versione verificata mediante il workflow previsto. Una pagina pre-evento può essere pubblicata in draft dopo aver completato i dati richiesti dal gate.
 
 Questo registro va aggiornato con commit remoto, pull request, run CI e prove effettive quando le dipendenze vengono risolte.
