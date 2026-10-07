@@ -332,6 +332,19 @@ function updatePrivacy(): void {
     paragraph(eventConfig.privacyNotice, 'notice-text');
     paragraph(`Data controller: ${eventConfig.controllerName}. Contact: ${eventConfig.controllerEmail}.`);
     paragraph(`Notice version: ${eventConfig.privacyVersion}.`);
+    if (eventConfig.status === 'draft') {
+      const heading = document.createElement('h3'); heading.textContent = 'Service provider privacy information'; target.append(heading);
+      const links = document.createElement('ul');
+      for (const [label, href] of [
+        ['GitHub privacy statement', 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement'],
+        ['Supabase privacy policy', 'https://supabase.com/privacy'],
+      ]) {
+        const item = document.createElement('li'); const link = document.createElement('a');
+        link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.textContent = `${label} (opens in a new tab)`; item.append(link); links.append(item);
+      }
+      target.append(links); return;
+    }
   } else paragraph('This preview keeps your card selection in this browser. Community participation and catalogue requests are unavailable until the event opens. You can clear your selection using “Delete my participation”.');
   const heading = document.createElement('h3'); heading.textContent = 'Your browser session'; target.append(heading);
   paragraph('When the event is open, a private session lets you update one response from this browser. Clearing browser data or using another device can create a separate response. Public results show only totals.');

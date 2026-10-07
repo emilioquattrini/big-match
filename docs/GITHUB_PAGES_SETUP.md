@@ -2,6 +2,8 @@
 
 Aggiornato il 7 ottobre 2026. L'utente ha confermato il passaggio di Pages Source a **GitHub Actions**. Questa guida completa le variabili pubbliche richieste dal workflow già presente; non modifica o disattiva i controlli di rilascio.
 
+L'utente ha inoltre confermato l'inserimento delle cinque variabili alle **09:14 Europe/Rome**. La conferma è dell'utente: il workflow di pubblicazione ne verifica i valori effettivamente disponibili durante build e controllo del backend.
+
 ## Inserire le variabili del repository
 
 Aprire il repository `emilioquattrini/big-match`, poi **Settings → Secrets and variables → Actions → Variables → New repository variable**. Per ogni riga copiare Name e Value e premere **Add variable**. Se una voce esiste già, aprirla e aggiornare il valore.

@@ -1,0 +1,25 @@
+Pre-event preview
+
+This notice covers the BIG MATCH preview before the event opens. Community submissions and catalogue requests are currently closed. Your card composition stays in this browser and is not submitted as an event response.
+
+The browser remembers your selection and caches app files so you can return to the preview. Your local selection has no automatic expiry. Use “Delete my participation” to clear it, or clear this site's data in your browser settings. If you choose to share a composition, the selected recipient or service receives the image or a link containing the event and three card IDs.
+
+An existing private session, if present in your browser from earlier use, may be restored or used to view or delete previously saved data. This preview does not create a new participation when you choose cards.
+
+Technical data
+
+Serving the website and loading public event information involves technical connection data, such as IP addresses, request times and browser information. We use the technical data needed to operate this preview and prevent automated requests from disrupting it. The legal basis is our legitimate interest in keeping the preview available and protecting its operation, under Article 6(1)(f) GDPR. The app does not add advertising or audience-measurement tools.
+
+The app's request protection stores a code derived from network information, request counters and time windows. The code changes daily. Records older than two days are removed by the hourly cleanup. These are technical identifiers, not anonymous data.
+
+Providers and retention
+
+GitHub Pages hosts the website and records visitors' IP addresses for security. Supabase provides the backend; this project's database is in Frankfurt. Supabase Pro provides access to the last seven days of daily database backups, so deleting an active technical record does not immediately remove an earlier backup copy. Providers also keep service and security logs under their published policies, for operating and securing their services and meeting legal requirements.
+
+Provider operations can involve processing outside the European Economic Area, including the United States. Their terms describe the applicable safeguards, including the European Commission's standard contractual clauses. You can request information about the applicable safeguards from the controller.
+
+Your rights
+
+Contact Chiara Zhu at chiara.czhu@gmail.com to request access, correction, deletion or restriction of personal data, or to object to processing based on legitimate interests. We may need information that allows us to locate a technical record. You can also complain to the Italian Garante per la protezione dei dati personali or another competent supervisory authority.
+
+A separate event notice will explain participation and catalogue requests before those features open.
