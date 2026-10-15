@@ -115,11 +115,8 @@ REVOKE EXECUTE ON FUNCTION public.bm_preorder(text,text,text,integer,text,text,u
 GRANT EXECUTE ON FUNCTION public.bm_preorder(text,text,text,integer,text,text,uuid,text),
   public.bm_preorder_cleanup(timestamptz) TO service_role;
 
-SELECT cron.schedule(
-  'big-match-preorder-retention',
-  '37 * * * *',
-  $job$SELECT public.bm_preorder_cleanup();$job$
-);
+-- The hosted hourly schedule is installed separately by supabase/ops/install-preorder-retention.sql.
+-- Keeping it out of this portable migration lets local/PGlite tests execute the application schema.
 
 -- Enable the commercial form for BIG once collection_ready/status open are activated.
 UPDATE big_match.events SET contact_enabled=true WHERE slug='big-2026';
