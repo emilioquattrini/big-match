@@ -34,7 +34,7 @@ let selectionGeneration = 0;
 let saveBusy = false;
 let refreshBusy = false;
 let dataGeneration = 0;
-let contactBusy = false;
+let preorderBusy = false;
 let deleteBusy = false;
 let exportBusy = false;
 let retryAction: 'save' | 'refresh' | 'latest' | null = null;
@@ -44,7 +44,7 @@ let posterKey = '';
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 let waitingWorker: ServiceWorker | null = null;
 let isLocalNavigation = false;
-let contactRequest: { payload: string; id: string } | null = null;
+let preorderRequest: { payload: string; id: string } | null = null;
 
 function el<T extends HTMLElement = HTMLElement>(id: string): T { const element = document.getElementById(id); if (!element) throw new Error(`Missing element ${id}`); return element as T; }
 const result = el<HTMLDialogElement>('result');
@@ -89,8 +89,11 @@ function same(a: readonly number[], b: readonly number[]): boolean { return a.le
 function message(error: unknown): string { return error instanceof Error ? error.message : 'Something went wrong. Please try again.'; }
 function toast(text: string): void { const target = el('toast'); (privacy.open ? privacy : result.open ? result : document.body).append(target); target.textContent = text; target.classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => target.classList.remove('visible'), 4500); }
 function setStatus(text: string, retry: typeof retryAction = null): void { el('save-status').textContent = text; retryAction = retry; const button = el<HTMLButtonElement>('retry-save'); button.hidden = retry === null; button.textContent = retry === 'latest' ? 'LOAD LATEST RESULT' : retry === 'refresh' ? 'REFRESH CONNECTIONS' : 'TRY AGAIN'; button.disabled = saveBusy; }
-function updateBusy(): void { el<HTMLButtonElement>('again').disabled = saveBusy || deleteBusy; el<HTMLButtonElement>('retry-save').disabled = saveBusy || refreshBusy; el<HTMLButtonElement>('erase-data').disabled = saveBusy || deleteBusy; el<HTMLButtonElement>('apply-update').disabled = saveBusy || contactBusy || deleteBusy || exportBusy || Boolean(state.pending) || contactHasDraft(); }
-function contactHasDraft(): boolean { return Boolean(el<HTMLInputElement>('contact-email').value || el<HTMLInputElement>('contact-name').value); }
+function updateBusy(): void { el<HTMLButtonElement>('again').disabled = saveBusy || deleteBusy; el<HTMLButtonElement>('retry-save').disabled = saveBusy || refreshBusy; el<HTMLButtonElement>('erase-data').disabled = saveBusy || deleteBusy; el<HTMLButtonElement>('apply-update').disabled = saveBusy || preorderBusy || deleteBusy || exportBusy || Boolean(state.pending) || preorderHasDraft(); }
+function preorderHasDraft(): boolean {
+  return Boolean(el<HTMLInputElement>('preorder-email').value || el<HTMLInputElement>('preorder-name').value
+    || el<HTMLInputElement>('preorder-country').value || el<HTMLSelectElement>('preorder-quantity').value !== '1');
+}
 function hideStats(): void { el('connection-stats').hidden = true; el('strongest').hidden = true; }
 function shareUrl(): string { const url = new URL(canonicalBaseUrl); url.hash = buildResultHash(eventSlug, catalogue.deckVersion, viewIds); return url.href; }
 
@@ -236,10 +239,13 @@ async function loadEvent(force = false): Promise<EventConfig | null> {
       renderSelection();
       el('question').textContent = config.question;
       const notice = el('event-notice'); notice.hidden = config.status === 'open'; notice.textContent = config.status === 'closed' ? 'The event has ended. You can still explore the cards and view the community.' : 'The event is not open yet. You can explore the cards and create your composition.';
-      el('contact-section').hidden = !config.contactEnabled || config.status !== 'open'; updatePrivacy(); return config;
+      const preorderAvailable = config.preorderEnabled && config.status === 'open';
+      el('preorder-section').hidden = !preorderAvailable;
+      el('preorder-link').hidden = !preorderAvailable;
+      updatePrivacy(); return config;
     } catch (error) {
       el('event-notice').hidden = false; el('event-notice').textContent = incompatible ? message(error) : 'The community is temporarily unavailable. Your composition is still here.';
-      el('contact-section').hidden = true; updatePrivacy(); return null;
+      el('preorder-section').hidden = true; el('preorder-link').hidden = true; updatePrivacy(); return null;
     } finally { configPromise = null; }
   })();
   return configPromise;
@@ -345,28 +351,46 @@ function updatePrivacy(): void {
       }
       target.append(links); return;
     }
-  } else paragraph('This preview keeps your card selection in this browser. Community participation and catalogue requests are unavailable until the event opens. You can clear your selection using “Delete my participation”.');
+  } else paragraph('This preview keeps your card selection in this browser. Community participation and Impersonae pre-orders are unavailable until the event opens. You can clear your selection using “Delete my participation”.');
   const heading = document.createElement('h3'); heading.textContent = 'Your browser session'; target.append(heading);
   paragraph('When the event is open, a private session lets you update one response from this browser. Clearing browser data or using another device can create a separate response. Public results show only totals.');
   paragraph('A shared link contains the event and the three card IDs. It does not include your browser session or contact details.');
-  paragraph('Catalogue requests are optional and stored separately from card choices. The studio uses the contact details to handle your request.');
+  paragraph('Impersonae pre-order requests are optional and stored separately from card choices. They are used only to manage the requested purchase and are not a newsletter subscription. No payment is taken in BIG MATCH. Pre-order records are scheduled for deletion after 180 days unless they are needed to complete or document the requested purchase.');
 }
 
-async function requestCatalogue(event: SubmitEvent): Promise<void> {
-  event.preventDefault(); if (contactBusy) return;
-  const form = el<HTMLFormElement>('contact-form'); if (!form.reportValidity()) return;
-  if (!eventConfig?.contactEnabled || eventConfig.status !== 'open') { el('contact-status').textContent = 'Catalogue requests are unavailable right now. Please try again later.'; return; }
-  contactBusy = true; updateBusy(); const button = el<HTMLButtonElement>('submit-contact'); button.disabled = true; button.textContent = 'SAVING REQUEST…';
-  const body = { email: el<HTMLInputElement>('contact-email').value.trim(), name: el<HTMLInputElement>('contact-name').value.trim(), privacyVersion: eventConfig.privacyVersion, website: (form.elements.namedItem('website') as HTMLInputElement).value };
-  const payload = JSON.stringify(body); if (contactRequest?.payload !== payload) contactRequest = { payload, id: crypto.randomUUID() };
+async function requestPreorder(event: SubmitEvent): Promise<void> {
+  event.preventDefault(); if (preorderBusy) return;
+  const form = el<HTMLFormElement>('preorder-form'); if (!form.reportValidity()) return;
+  if (!eventConfig?.preorderEnabled || eventConfig.status !== 'open') {
+    el('preorder-status').textContent = 'Pre-orders are unavailable right now. Please try again later.'; return;
+  }
+  preorderBusy = true; updateBusy();
+  const button = el<HTMLButtonElement>('submit-preorder'); button.disabled = true; button.textContent = 'SAVING PRE-ORDER…';
+  const body = {
+    email: el<HTMLInputElement>('preorder-email').value.trim(),
+    name: el<HTMLInputElement>('preorder-name').value.trim(),
+    quantity: Number(el<HTMLSelectElement>('preorder-quantity').value),
+    country: el<HTMLInputElement>('preorder-country').value.trim(),
+    privacyVersion: eventConfig.privacyVersion,
+    website: (form.elements.namedItem('website') as HTMLInputElement).value,
+  };
+  const payload = JSON.stringify(body);
+  if (preorderRequest?.payload !== payload) preorderRequest = { payload, id: crypto.randomUUID() };
   try {
-    const saved = await api.contact({ ...body, requestId: contactRequest.id });
-    if (!saved.saved) throw new ApiError('The request could not be saved. Please try again.', 502, 'INVALID_RESPONSE');
-    form.reset(); form.querySelectorAll('input').forEach(input => input.disabled = true); button.textContent = 'REQUEST RECEIVED'; el('contact-status').textContent = 'Your request has been saved. The studio will send you the catalogue.'; contactRequest = null;
+    const saved = await api.preorder({ ...body, requestId: preorderRequest.id });
+    if (!saved.saved) throw new ApiError('The pre-order could not be saved. Please try again.', 502, 'INVALID_RESPONSE');
+    form.reset();
+    form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select').forEach(input => input.disabled = true);
+    button.textContent = 'PRE-ORDER RECEIVED';
+    el('preorder-status').textContent = 'Your pre-order request is recorded. No payment has been taken. The studio will contact you when checkout opens.';
+    preorderRequest = null;
   } catch (error) {
-    el('contact-status').textContent = message(error); button.disabled = false; button.textContent = 'REQUEST CATALOGUE ↗';
-    if ((error as ApiError).status === 409) { await loadEvent(true); el<HTMLInputElement>('privacy-ack').checked = false; el('contact-status').textContent = 'Please read the updated privacy information, then submit your request again.'; }
-  } finally { contactBusy = false; updateBusy(); }
+    el('preorder-status').textContent = message(error); button.disabled = false; button.textContent = 'SAVE PRE-ORDER ↗';
+    if ((error as ApiError).status === 409) {
+      await loadEvent(true); el<HTMLInputElement>('preorder-privacy-ack').checked = false;
+      el('preorder-status').textContent = 'Please read the updated privacy information, then submit your pre-order again.';
+    }
+  } finally { preorderBusy = false; updateBusy(); }
 }
 
 async function eraseParticipation(): Promise<void> {
@@ -412,8 +436,14 @@ el('copy-link').addEventListener('click', () => { void copyLink(); });
 el('retry-save').addEventListener('click', () => { if (retryAction === 'save') void saveCurrent(); else void refreshPersonal(retryAction === 'latest'); });
 document.querySelectorAll<HTMLButtonElement>('.privacy-link').forEach(button => button.addEventListener('click', () => privacy.showModal()));
 el('close-privacy').addEventListener('click', () => privacy.close());
-el('contact-form').addEventListener('submit', event => { void requestCatalogue(event); });
-el('contact-form').addEventListener('input', updateBusy);
+el('preorder-link').addEventListener('click', event => {
+  event.preventDefault();
+  el('preorder-section').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  setTimeout(() => el<HTMLInputElement>('preorder-email').focus({ preventScroll: true }), 250);
+});
+el('preorder-form').addEventListener('submit', event => { void requestPreorder(event); });
+el('preorder-form').addEventListener('input', updateBusy);
+el('preorder-form').addEventListener('change', updateBusy);
 el('erase-data').addEventListener('click', () => { el('delete-status').textContent = ''; deleteDialog.showModal(); el('cancel-delete').focus(); });
 el('cancel-delete').addEventListener('click', () => deleteDialog.close());
 deleteDialog.addEventListener('cancel', event => { if (deleteBusy) event.preventDefault(); });
@@ -422,7 +452,7 @@ window.addEventListener('hashchange', handleRoute);
 window.addEventListener('online', () => { void loadEvent(true); if (result.open) { if (viewKind === 'shared') void refreshPublic(); else if (!state.pending) void refreshPersonal(); } });
 window.addEventListener('offline', () => { if (result.open && viewKind === 'own') setStatus(state.ack && same(state.ack.cardIds, viewIds) ? 'You are offline. Your saved response is safe; displayed connections may be out of date.' : 'You are offline. Your composition is kept on this device. Retry to join the community.', state.ack && same(state.ack.cardIds, viewIds) ? 'refresh' : 'save'); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && result.open && !saveBusy) { if (viewKind === 'shared') void refreshPublic(); else if (!state.pending) void refreshPersonal(); } });
-setInterval(() => { if (document.visibilityState === 'visible' && result.open && !saveBusy && !contactBusy) { if (viewKind === 'shared') void refreshPublic(); else if (!state.pending) void refreshPersonal(); } }, 30_000);
+setInterval(() => { if (document.visibilityState === 'visible' && result.open && !saveBusy && !preorderBusy) { if (viewKind === 'shared') void refreshPublic(); else if (!state.pending) void refreshPersonal(); } }, 30_000);
 window.addEventListener('storage', event => { if (event.key === key && !saveBusy && viewKind === 'own' && result.open) void refreshPersonal(); });
 
 async function registerWorker(): Promise<void> {
@@ -447,7 +477,7 @@ async function registerWorker(): Promise<void> {
     navigator.serviceWorker.addEventListener('controllerchange', syncUpdateNotice);
     el('apply-update').addEventListener('click', () => {
       syncUpdateNotice();
-      if (updateRequested || !waitingWorker || saveBusy || contactBusy || exportBusy || deleteBusy || state.pending || contactHasDraft()) return;
+      if (updateRequested || !waitingWorker || saveBusy || preorderBusy || exportBusy || deleteBusy || state.pending || preorderHasDraft()) return;
       updateRequested = true;
       navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); waitingWorker.postMessage({ type: 'ACTIVATE_UPDATE' });
     });

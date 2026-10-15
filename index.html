@@ -49,6 +49,7 @@
       <p class="invite-push">Share your vision of design.<br>Invite someone to find their #BIGMATCH.</p>
       <div class="share-actions"><button id="download" class="button button-pink" type="button" disabled>PREPARING STORY…</button><button id="share" class="button" type="button" disabled>SHARE</button><button id="copy-link" class="button button-light" type="button">COPY LINK</button></div>
       <p id="export-status" class="helper" role="status"></p><input id="share-link" class="share-link" readonly aria-label="Link to this composition" hidden>
+      <div class="preorder-link-row"><a id="preorder-link" class="button button-preorder" href="#preorder-section" hidden>PRE-ORDER IMPERSONAE ↘</a></div>
 
       <section class="content-section" aria-labelledby="connections-title">
         <p class="eyebrow">A VISION IN COMMON</p><h3 id="connections-title">YOUR<br>CONNECTIONS.</h3>
@@ -66,16 +67,27 @@
         <details id="mind-details" hidden><summary>Explore all card frequencies</summary><ul id="mind-list" class="mind-list"></ul><h4>Most frequent pairs</h4><ol id="pair-list" class="pair-list"></ol></details>
       </section>
 
-      <section id="contact-section" class="content-section lead-gen" aria-labelledby="lead-title" hidden>
-        <p class="eyebrow">KEEP EXPLORING</p><h3 id="lead-title">GET THE<br>CATALOGUE.</h3><p class="section-intro">Leave your email to receive the Impersonae catalogue from the studio.</p>
-        <form id="contact-form"><label>Email address<input type="email" name="email" id="contact-email" autocomplete="email" inputmode="email" maxlength="254" required></label><label>Name <span class="optional">(optional)</span><input type="text" name="name" id="contact-name" autocomplete="given-name" maxlength="100"></label><label class="honeypot" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label><label class="checkbox-label"><input type="checkbox" id="privacy-ack" required><span>Please send me the catalogue. I have read <button class="text-button privacy-link" type="button">how my contact details are used</button>.</span></label><button id="submit-contact" class="button" type="submit">REQUEST CATALOGUE ↗</button><p id="contact-status" role="status" class="helper"></p></form>
+      <section id="preorder-section" class="content-section lead-gen preorder" aria-labelledby="preorder-title" hidden>
+        <p class="eyebrow">TAKE IMPERSONAE HOME</p><h3 id="preorder-title">PRE-ORDER<br>THE DECK.</h3>
+        <p class="section-intro">Reserve the first Impersonae deck. No payment is taken now: the studio will contact you with the final price and checkout when sales open.</p>
+        <div class="preorder-summary"><span>IMPERSONAE DECK</span><b>FIRST EDITION</b><small>Pre-order request · payment later · not a newsletter</small></div>
+        <form id="preorder-form">
+          <label>Email address<input type="email" name="email" id="preorder-email" autocomplete="email" inputmode="email" maxlength="254" required></label>
+          <label>Name <span class="optional">(optional)</span><input type="text" name="name" id="preorder-name" autocomplete="name" maxlength="120"></label>
+          <label>Quantity<select name="quantity" id="preorder-quantity" required><option value="1">1 deck</option><option value="2">2 decks</option><option value="3">3 decks</option><option value="4">4 decks</option><option value="5">5 decks</option></select></label>
+          <label>Country <span class="optional">(optional)</span><input type="text" name="country" id="preorder-country" autocomplete="country-name" maxlength="80"></label>
+          <label class="honeypot" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+          <label class="checkbox-label"><input type="checkbox" id="preorder-privacy-ack" required><span>I want to reserve the Impersonae deck. I have read <button class="text-button privacy-link" type="button">how my pre-order details are used</button>.</span></label>
+          <button id="submit-preorder" class="button button-preorder" type="submit">SAVE PRE-ORDER ↗</button>
+          <p id="preorder-status" role="status" class="helper"></p>
+        </form>
       </section>
       <footer class="result-footer"><button class="text-button privacy-link" type="button">Privacy & your data</button><span>Impersonae × BIG Milano</span></footer>
     </div>
   </dialog>
 
   <dialog id="privacy" class="small-dialog" aria-labelledby="privacy-title"><button id="close-privacy" class="close" type="button" aria-label="Close privacy information">×</button><h2 id="privacy-title">YOUR DATA.</h2><div id="privacy-copy"></div></dialog>
-  <dialog id="delete-dialog" class="small-dialog" aria-labelledby="delete-title"><h2 id="delete-title">DELETE YOUR<br>PARTICIPATION?</h2><p>This removes the response linked to this browser from the event. Catalogue requests are kept separately; contact the studio if you also want to remove one.</p><p id="delete-status" role="status"></p><div class="share-actions"><button id="cancel-delete" class="button button-light" type="button">KEEP IT</button><button id="confirm-delete" class="button" type="button">DELETE</button></div></dialog>
+  <dialog id="delete-dialog" class="small-dialog" aria-labelledby="delete-title"><h2 id="delete-title">DELETE YOUR<br>PARTICIPATION?</h2><p>This removes the response linked to this browser from the event. Pre-order requests are kept separately; contact the studio if you also want to remove one.</p><p id="delete-status" role="status"></p><div class="share-actions"><button id="cancel-delete" class="button button-light" type="button">KEEP IT</button><button id="confirm-delete" class="button" type="button">DELETE</button></div></dialog>
   <div id="update-notice" class="update-notice" role="status" hidden><span>A new version is ready.</span><button id="apply-update" class="button-small" type="button">UPDATE</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Please enable JavaScript to choose your three cards.</p></noscript>

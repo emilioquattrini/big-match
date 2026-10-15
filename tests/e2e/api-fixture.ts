@@ -15,7 +15,7 @@ export class EventFixture {
     slug: 'big-2026', title: 'BIG MATCH — Browser fixture',
     question: 'What does the future of design look like?', deckVersion: catalogue.deckVersion,
     status: 'open', activeCardIds: catalogue.cards.map(card => card.id),
-    contactEnabled: false, privacyVersion: 'fixture-v1',
+    contactEnabled: false, preorderEnabled: false, privacyVersion: 'fixture-v1',
     privacyNotice: 'Test fixture: technical participation and optional catalogue requests are separate.',
     controllerName: 'Test Controller', controllerEmail: 'controller@example.invalid', retentionDays: 60,
   };
@@ -24,6 +24,7 @@ export class EventFixture {
   snapshot: MindSnapshot | null = null;
   putBodies: PendingParticipation[] = [];
   contactBodies: Array<{ email: string; name?: string; privacyVersion: string; requestId: string; website?: string }> = [];
+  preorderBodies: Array<{ email: string; name?: string; quantity: number; country?: string; privacyVersion: string; requestId: string; website?: string }> = [];
   unexpectedRequests: string[] = [];
   diagnostics: Array<{ phase: string; method: string; origin: string; path: string; status?: number; failure?: string }> = [];
   authSignups = 0;
@@ -32,6 +33,7 @@ export class EventFixture {
   loseNextPutResponse = false;
   conflictNextPut = false;
   failContacts = 0;
+  failPreorders = 0;
   failDeletes = 0;
   holdNextPersonalRead = false;
   private heldPersonalReads: Array<{ route: Route; value: unknown }> = [];
@@ -130,6 +132,11 @@ export class EventFixture {
         this.ack = null; this.deleted = true;
         return this.json(route, { deleted: true });
       }
+    }
+    if (url.pathname === eventPath + '/preorder' && method === 'POST') {
+      const body = request.postDataJSON(); this.preorderBodies.push(structuredClone(body));
+      if (this.failPreorders-- > 0) return this.json(route, { error: { code: 'UNAVAILABLE', message: 'The pre-order could not be saved. Please try again.' } }, 503);
+      return this.json(route, { saved: true, requestId: body.requestId });
     }
     if (url.pathname === eventPath + '/contact' && method === 'POST') {
       const body = request.postDataJSON(); this.contactBodies.push(structuredClone(body));

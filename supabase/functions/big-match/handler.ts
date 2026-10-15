@@ -29,6 +29,7 @@ const errorMap: Record<string, [number, string]> = {
   BM_DELETED: [410, 'This session has been erased. Start a new session to participate again.'],
   BM_EVENT_CLOSED: [410, 'This event is not accepting new responses.'],
   BM_CONTACT_DISABLED: [503, 'Catalogue requests are not available right now.'],
+  BM_PREORDER_DISABLED: [503, 'Impersonae pre-orders are not available right now.'],
   BM_PRIVACY_CHANGED: [409, 'The privacy notice changed. Please read the current notice and try again.'],
   BM_RATE_LIMIT: [429, 'Too many requests. Please wait a minute and try again.'],
   BM_CONFIG_REQUIRED: [503, 'This event is not ready to collect responses.'],
@@ -211,7 +212,7 @@ export function createHandler(options: { env: Env; fetchImpl?: Fetcher }): (requ
       const prefix = '/functions/v1/big-match';
       const route = pathname.startsWith(prefix + '/') ? pathname.slice(prefix.length)
         : pathname.startsWith('/big-match/') ? pathname.slice('/big-match'.length) : '';
-      const match = /^\/events\/([^/]+)(?:\/(mind|me|contact))?\/?$/.exec(route);
+      const match = /^\/events\/([^/]+)(?:\/(mind|me|contact|preorder))?\/?$/.exec(route);
       if (!match || !SLUG.test(match[1])) throw new HttpError(404, 'NOT_FOUND', 'This endpoint does not exist.');
       const slug = match[1]; const operation = match[2] ?? 'event';
       const method = request.method;
@@ -241,6 +242,26 @@ export function createHandler(options: { env: Env; fetchImpl?: Fetcher }): (requ
 
       const networkKey = await rateKey(cfg, clientNetwork(request));
       await rpc(cfg, fetcher, 'bm_read_guard', { p_rate_key: networkKey });
+      if (operation === 'preorder') {
+        const body = await readBody(request);
+        fields(body, ['email', 'name', 'quantity', 'country', 'privacyVersion', 'requestId', 'website']);
+        const name = typeof body.name === 'string' ? body.name.trim().normalize('NFC') : '';
+        const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+        const country = typeof body.country === 'string' ? body.country.trim().normalize('NFC') : '';
+        if ((body.name !== undefined && typeof body.name !== 'string') || name.length > 120 ||
+            (body.country !== undefined && typeof body.country !== 'string') || country.length > 80 ||
+            !Number.isInteger(body.quantity) || Number(body.quantity) < 1 || Number(body.quantity) > 10 ||
+            email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+            typeof body.privacyVersion !== 'string' || body.privacyVersion.length < 1 || body.privacyVersion.length > 80 ||
+            (body.website !== undefined && body.website !== '')) {
+          throw new HttpError(400, 'INVALID_PREORDER', 'Please check your email, quantity and privacy acknowledgement.');
+        }
+        return json(await rpc(cfg, fetcher, 'bm_preorder', {
+          p_slug: slug, p_email: email, p_name: name || null, p_quantity: body.quantity,
+          p_country: country || null, p_privacy_version: body.privacyVersion,
+          p_request_id: requestId(body.requestId), p_rate_key: networkKey,
+        }), headers);
+      }
       if (operation === 'contact') {
         const body = await readBody(request);
         fields(body, ['email', 'name', 'privacyVersion', 'requestId', 'website']);

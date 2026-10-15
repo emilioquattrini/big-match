@@ -94,6 +94,11 @@ export class BigMatchApi {
   async save(body: PendingParticipation): Promise<ParticipationAck> { const value = await this.request('/me', { auth: true, method: 'PUT', body }); if (!isAck(value) || value.requestId !== body.requestId || value.cardIds.join('-') !== [...body.cardIds].sort((a,b)=>a-b).join('-')) throw new ApiError('The response could not be confirmed. Please try again.', 502, 'INVALID_RESPONSE'); return value; }
   async erase(requestId: string): Promise<{ deleted: true }> { const value = await this.request<{ deleted?: unknown }>('/me', { auth: true, createSession: false, method: 'DELETE', body: { requestId } }); if (!value || value.deleted !== true) throw new ApiError('The deletion could not be confirmed. Please try again.', 502, 'INVALID_RESPONSE'); return { deleted: true }; }
   async contact(body: { email: string; name?: string; privacyVersion: string; requestId: string; website: string }): Promise<{ saved: true; requestId: string }> { const value = await this.request<{ saved?: unknown; requestId?: unknown }>('/contact', { method: 'POST', body }); if (!value || value.saved !== true || value.requestId !== body.requestId) throw new ApiError('The catalogue request could not be confirmed. Please try again.', 502, 'INVALID_RESPONSE'); return { saved: true, requestId: body.requestId }; }
+  async preorder(body: { email: string; name?: string; quantity: number; country?: string; privacyVersion: string; requestId: string; website: string }): Promise<{ saved: true; requestId: string }> {
+    const value = await this.request<{ saved?: unknown; requestId?: unknown }>('/preorder', { method: 'POST', body });
+    if (!value || value.saved !== true || value.requestId !== body.requestId) throw new ApiError('The pre-order could not be confirmed. Please try again.', 502, 'INVALID_RESPONSE');
+    return { saved: true, requestId: body.requestId };
+  }
   async forgetSession(): Promise<void> {
     if (this.client) {
       const { error } = await this.client.auth.signOut({ scope: 'local' });
