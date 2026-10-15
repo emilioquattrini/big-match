@@ -99,11 +99,43 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.bm_cleanup(p_now timestamptz DEFAULT now()) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $
+DECLARE e big_match.events; v_snapshot jsonb; v_events integer:=0; v_contacts integer; v_auth integer;
+BEGIN
+  FOR e IN SELECT * FROM big_match.events
+    WHERE archived_at IS NULL AND ends_at+make_interval(days=>retention_days)<=p_now
+    ORDER BY id FOR UPDATE
+  LOOP
+    v_snapshot:=big_match.read_result(e.id,NULL)->'mind';
+    INSERT INTO big_match.archived_mind(event_id,snapshot,archived_at) VALUES(e.id,v_snapshot,p_now);
+    UPDATE big_match.events
+    SET status='closed',contact_enabled=false,preorder_enabled=false,collection_ready=false,archived_at=p_now
+    WHERE id=e.id;
+    DELETE FROM big_match.actors WHERE event_id=e.id;
+    v_events:=v_events+1;
+  END LOOP;
+  DELETE FROM big_match_contacts.requests c USING big_match.events contact_event
+  WHERE c.event_id=contact_event.id AND c.created_at+make_interval(days=>contact_event.retention_days)<=p_now;
+  GET DIAGNOSTICS v_contacts=ROW_COUNT;
+  DELETE FROM big_match.rate_limits WHERE window_start < p_now-interval '2 days';
+  DELETE FROM auth.users u USING big_match.auth_subjects s
+  WHERE u.id=s.actor_id AND u.is_anonymous IS TRUE AND s.expires_at<=p_now
+    AND NOT EXISTS(SELECT 1 FROM big_match.actors a WHERE a.actor_id=u.id);
+  GET DIAGNOSTICS v_auth=ROW_COUNT;
+  DELETE FROM big_match.auth_subjects s WHERE s.expires_at<=p_now
+    AND NOT EXISTS(SELECT 1 FROM big_match.actors a WHERE a.actor_id=s.actor_id);
+  RETURN jsonb_build_object('eventsArchived',v_events,'contactsDeleted',v_contacts,'anonymousUsersDeleted',v_auth);
+END;
+$;
+
 REVOKE EXECUTE ON FUNCTION public.bm_event(text),
-  public.bm_preorder(text,text,text,integer,text,text,uuid,text)
+  public.bm_preorder(text,text,text,integer,text,text,uuid,text),
+  public.bm_cleanup(timestamptz)
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.bm_event(text),
-  public.bm_preorder(text,text,text,integer,text,text,uuid,text)
+  public.bm_preorder(text,text,text,integer,text,text,uuid,text),
+  public.bm_cleanup(timestamptz)
   TO service_role;
 
 -- Explicitly keep the obsolete catalogue endpoint disabled for BIG.

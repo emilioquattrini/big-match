@@ -21,7 +21,7 @@ test('a personal result cannot count the owner or claim matches without a partic
   assert.equal(isPersonalResult({participation:ack,matches:{exact:-1,close:0},mind}),false);
 });
 test('event configuration validates active IDs and collection controls', () => {
-  const config = {slug:'big-2026',title:'BIG MATCH',question:'Future of design?',deckVersion:'impersonae-v1',status:'draft',activeCardIds:[1,2,3],contactEnabled:false,privacyVersion:'',privacyNotice:'',controllerName:'',controllerEmail:'',retentionDays:30};
+  const config = {slug:'big-2026',title:'BIG MATCH',question:'Future of design?',deckVersion:'impersonae-v1',status:'draft',activeCardIds:[1,2,3],contactEnabled:false,preorderEnabled:false,privacyVersion:'',privacyNotice:'',controllerName:'',controllerEmail:'',retentionDays:30};
   assert.ok(isEventConfig(config));
   assert.equal(isEventConfig({...config,activeCardIds:[1,1,2]}),false);
   assert.equal(isEventConfig({...config,contactEnabled:'false'}),false);
