@@ -100,7 +100,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.bm_cleanup(p_now timestamptz DEFAULT now()) RETURNS jsonb
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $bm_cleanup$
 DECLARE e big_match.events; v_snapshot jsonb; v_events integer:=0; v_contacts integer; v_auth integer;
 BEGIN
   FOR e IN SELECT * FROM big_match.events
@@ -127,7 +127,10 @@ BEGIN
     AND NOT EXISTS(SELECT 1 FROM big_match.actors a WHERE a.actor_id=s.actor_id);
   RETURN jsonb_build_object('eventsArchived',v_events,'contactsDeleted',v_contacts,'anonymousUsersDeleted',v_auth);
 END;
-$;
+$bm_cleanup$;
+
+CREATE INDEX IF NOT EXISTS big_match_preorder_receipts_preorder_id_idx
+ON big_match_preorders.receipts(preorder_id);
 
 REVOKE EXECUTE ON FUNCTION public.bm_event(text),
   public.bm_preorder(text,text,text,integer,text,text,uuid,text),
