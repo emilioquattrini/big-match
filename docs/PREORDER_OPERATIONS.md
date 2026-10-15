@@ -16,7 +16,7 @@ The application stores email, optional name, quantity, optional country, privacy
 
 Duplicate submissions with the same event/email do not create a second pre-order. A repeated request ID with changed payload is rejected.
 
-The technical default retention is 180 days. The hourly `big-match-preorder-retention` job removes expired records. This period should be reviewed before the event if checkout or fulfilment is expected to take longer.
+The technical default retention is 180 days. The hourly `big-match-preorder-retention` job removes expired records. The event uses a dedicated `preorder_enabled` gate; the legacy catalogue/contact gate stays off. This period should be reviewed before the event if checkout or fulfilment is expected to take longer.
 
 ## Fulfilment
 Initial status is `requested`. Recommended operator workflow:

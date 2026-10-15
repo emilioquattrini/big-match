@@ -164,7 +164,7 @@ test('shared links fetch public aggregates without creating an identity or respo
 });
 
 test('pre-order failure keeps the form and retry ID; acknowledgement records a reservation without payment', async ({ page }) => {
-  fixture.config.contactEnabled = true; fixture.failPreorders = 1;
+  fixture.config.preorderEnabled = true; fixture.failPreorders = 1;
   await page.goto('./');
   await choose(page);
   await expect(page.locator('#save-status')).toContainText('Your response is saved.');

@@ -49,13 +49,14 @@ describe('BIG MATCH actual PostgreSQL migration and service RPCs', { concurrency
     await db.exec(await readFile(migration,'utf8'));
     await db.exec(await readFile(seed,'utf8'));
     await db.exec(await readFile(new URL('../../supabase/migrations/20261016012000_impersonae_preorders.sql', import.meta.url),'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261016014500_preorder_event_gate.sql', import.meta.url),'utf8'));
   });
   after(async () => { await db.close(); });
 
   it('seeds the 13 original cards with a guarded draft and no fabricated participants', async () => {
     const config = await rpc('bm_event',['big-2026']);
     assert.equal(config.status,'draft');
-    assert.equal(config.contactEnabled,false);
+    assert.equal(config.contactEnabled,false); assert.equal(config.preorderEnabled,false);
     assert.deepEqual(config.activeCardIds,Array.from({length:13},(_,i)=>i+1));
     assert.equal((await mind('big-2026')).total,0);
     const uid = await actor();
@@ -219,7 +220,7 @@ describe('BIG MATCH actual PostgreSQL migration and service RPCs', { concurrency
   });
 
   it('stores preorder requests separately, idempotently and without card-choice foreign keys', async () => {
-    const e=await event(); await db.query('UPDATE big_match.events SET contact_enabled=true WHERE id=$1',[e.id]);
+    const e=await event(); await db.query('UPDATE big_match.events SET preorder_enabled=true WHERE id=$1',[e.id]);
     const key='c'.repeat(64); const req=randomUUID();
     const args=[e.slug,' Buyer@Example.Invalid ','Buyer',2,' Italy ','test-v1',req,key];
     const saved=await rpc('bm_preorder',args);

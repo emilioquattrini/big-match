@@ -239,7 +239,7 @@ async function loadEvent(force = false): Promise<EventConfig | null> {
       renderSelection();
       el('question').textContent = config.question;
       const notice = el('event-notice'); notice.hidden = config.status === 'open'; notice.textContent = config.status === 'closed' ? 'The event has ended. You can still explore the cards and view the community.' : 'The event is not open yet. You can explore the cards and create your composition.';
-      const preorderAvailable = config.contactEnabled && config.status === 'open';
+      const preorderAvailable = config.preorderEnabled && config.status === 'open';
       el('preorder-section').hidden = !preorderAvailable;
       el('preorder-link').hidden = !preorderAvailable;
       updatePrivacy(); return config;
@@ -361,7 +361,7 @@ function updatePrivacy(): void {
 async function requestPreorder(event: SubmitEvent): Promise<void> {
   event.preventDefault(); if (preorderBusy) return;
   const form = el<HTMLFormElement>('preorder-form'); if (!form.reportValidity()) return;
-  if (!eventConfig?.contactEnabled || eventConfig.status !== 'open') {
+  if (!eventConfig?.preorderEnabled || eventConfig.status !== 'open') {
     el('preorder-status').textContent = 'Pre-orders are unavailable right now. Please try again later.'; return;
   }
   preorderBusy = true; updateBusy();

@@ -61,6 +61,7 @@ describe('Edge transport + real PostgreSQL RPC integration (Auth service mocked)
     await db.exec(await readFile(new URL('../../supabase/migrations/20261006232008_big_match.sql',import.meta.url),'utf8'));
     await db.exec(await readFile(new URL('../../supabase/seed.sql',import.meta.url),'utf8'));
     await db.exec(await readFile(new URL('../../supabase/migrations/20261016012000_impersonae_preorders.sql',import.meta.url),'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261016014500_preorder_event_gate.sql',import.meta.url),'utf8'));
     await db.exec("INSERT INTO big_match.events(slug,title,question,deck_version,starts_at,ends_at) VALUES('test-edge','Edge test','Choose 3','impersonae-v1',now()-interval '1 day',now()+interval '1 day')");
     await db.exec("INSERT INTO big_match.event_cards SELECT id,deck_version,n,true FROM big_match.events CROSS JOIN generate_series(1,13)n WHERE slug='test-edge'");
     await db.exec("UPDATE big_match.events SET status='open',collection_ready=true,privacy_version='test-v1',privacy_notice='Test-only privacy notice covering technical sessions, optional pre-orders and erasure.',controller_name='Test Controller',controller_email='test@example.invalid' WHERE slug='test-edge'");
@@ -75,7 +76,7 @@ describe('Edge transport + real PostgreSQL RPC integration (Auth service mocked)
     const response=await handler(request());
     assert.equal(response.status,200);
     const value=await response.json();
-    assert.equal(value.slug,'test-edge');assert.equal(value.contactEnabled,false);
+    assert.equal(value.slug,'test-edge');assert.equal(value.contactEnabled,false);assert.equal(value.preorderEnabled,false);
     assert.equal(response.headers.get('Access-Control-Allow-Origin'),origin);
     assert(!JSON.stringify(value).includes(SETTINGS.SUPABASE_SECRET_KEY));
   });
@@ -153,7 +154,7 @@ describe('Edge transport + real PostgreSQL RPC integration (Auth service mocked)
     assert.equal((await db.query("SELECT count(*)::int AS n FROM big_match_contacts.requests WHERE email='buyer@example.invalid'")).rows[0].n,1);
   });
   it('accepts a separated Impersonae pre-order without creating or linking a participation',async()=>{
-    await db.exec("UPDATE big_match.events SET contact_enabled=true WHERE slug='test-edge'");
+    await db.exec("UPDATE big_match.events SET preorder_enabled=true WHERE slug='test-edge'");
     const payload={email:'preorder@example.invalid',name:'Buyer',quantity:2,country:'Italy',privacyVersion:'test-v1',requestId:randomUUID()};
     const saved=await handler(request('/preorder',{method:'POST',body:payload}));
     assert.equal(saved.status,200); assert.deepEqual(await saved.json(),{saved:true,requestId:payload.requestId});
