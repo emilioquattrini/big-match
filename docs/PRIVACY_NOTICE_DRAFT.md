@@ -2,7 +2,7 @@
 
 **DRAFT — 7 ottobre 2026.** Documento da completare e verificare con il titolare prima della pubblicazione. Non è stato inserito nel campo pubblico `privacy_notice` e non apre la raccolta dei dati.
 
-Per la fase con evento draft e raccolta disabilitata è disponibile un'[informativa specifica pre-evento](PRIVACY_PRE_EVENT.md). Il presente documento riguarda l'apertura delle partecipazioni e delle richieste catalogo, non viene sostituito dall'informativa dell'anteprima.
+Per la fase con evento draft e raccolta disabilitata è disponibile un'[informativa specifica pre-evento](PRIVACY_PRE_EVENT.md). Il presente documento riguarda l'apertura delle partecipazioni e delle richieste di pre-order Impersonae, non viene sostituito dall'informativa dell'anteprima.
 
 Il titolare indicato dall'utente è **Chiara Zhu**, con recapito **chiara.czhu@gmail.com**, confermato il 7 ottobre 2026 e registrato nella configurazione dell'evento `big-2026`. Nella stessa sessione l'utente ha confermato **30 giorni di conservazione** e **Chiara come responsabile dell'evasione manuale del catalogo**. Le regole temporali distinte sono riportate nel testo e nella tabella sotto.
 
@@ -26,9 +26,9 @@ BIG MATCH is a voluntary activity about the future of design. When the event is 
 
 Public results show counts of card choices and combinations, without browser identifiers or contact details. Matching compares the selected cards; it does not make decisions with legal or similarly significant effects.
 
-Requesting the catalogue
+Pre-ordering the Impersonae deck
 
-If you request the catalogue, we use your email address, optional name and request record to handle and fulfil that request, under Article 6(1)(b) GDPR. Your contact details are stored separately from your card choices. Providing an email is necessary to receive the catalogue; providing a name is optional. This is not a newsletter subscription.
+If you submit an Impersonae pre-order, we use your email address, optional name, requested quantity, optional country and request record to manage that requested purchase, under Article 6(1)(b) GDPR. Your pre-order details are stored separately from your card choices and are not used to build your BIG MATCH profile. No payment is collected in BIG MATCH. This is not a newsletter subscription.
 
 Security and storage
 
@@ -40,7 +40,7 @@ How long we keep data
 
 Individual responses, previous submissions and associated app identifiers are scheduled for deletion 30 days after the event ends. You can remove your card choices earlier using “Delete my participation”. A minimal technical record remains until the same expiry to prevent delayed requests from restoring them.
 
-Catalogue requests are scheduled for deletion 30 days after they are received. Cleanup runs hourly. Aggregate event totals without browser identifiers or contact details may remain available. These periods apply to the active app database; hosting logs and rolling backups have separate retention periods.
+Impersonae pre-order requests are scheduled for deletion after 180 days unless they are still needed to complete or document the requested purchase. Cleanup runs hourly. Aggregate event totals without browser identifiers or contact details may remain available. These periods apply to the active app database; hosting logs and rolling backups have separate retention periods.
 
 Service providers
 
@@ -50,7 +50,7 @@ Providers may process data outside the European Economic Area. Their published t
 
 Your rights
 
-Contact chiara.czhu@gmail.com to request access, correction, deletion or restriction of your data, and, where applicable, portability or to object to processing based on legitimate interests. Catalogue requests must be removed separately from your participation. If you have lost the browser session, we may need information that allows us to locate your response. You may also complain to the Italian data protection authority, Garante per la protezione dei dati personali, or another competent supervisory authority.
+Contact chiara.czhu@gmail.com to request access, correction, deletion or restriction of your data, and, where applicable, portability or to object to processing based on legitimate interests. Pre-order requests must be removed separately from your participation. If you have lost the browser session, we may need information that allows us to locate your response. You may also complain to the Italian data protection authority, Garante per la protezione dei dati personali, or another competent supervisory authority.
 ```
 
 ## Corrispondenza con l'applicazione

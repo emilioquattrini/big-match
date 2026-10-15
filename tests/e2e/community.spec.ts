@@ -22,7 +22,7 @@ test.afterEach(async ({}, testInfo) => {
   await writeFile(file, JSON.stringify({
     project: testInfo.project.name, status: testInfo.status,
     authSignups: fixture.authSignups, committedWrites: fixture.committedWrites,
-    putAttempts: fixture.putBodies.length, contactAttempts: fixture.contactBodies.length,
+    putAttempts: fixture.putBodies.length, contactAttempts: fixture.preorderBodies.length, preorderAttempts: fixture.preorderBodies.length,
     deleteAttempts: fixture.deleteCalls, unexpectedRequests: fixture.unexpectedRequests,
     transport: fixture.diagnostics,
   }, null, 2));
@@ -43,13 +43,13 @@ test('a genuine zero response count becomes one private browser response', async
   await expect(page.locator('#connection-stats')).toBeVisible();
   expect(fixture.authSignups).toBe(1);
   expect(fixture.putBodies).toHaveLength(1);
-  await expect(page.locator('#contact-section')).not.toBeVisible();
+  await expect(page.locator('#preorder-section')).not.toBeVisible();
 });
 
 test('a new visitor in draft creates a local downloadable composition without joining the event', async ({ page }, testInfo) => {
   fixture.config.status = 'draft';
   fixture.config.privacyVersion = 'pre-event-2026-10-07-v1';
-  fixture.config.privacyNotice = 'Pre-event preview\nYour card selection stays in this browser. Community participation and catalogue requests are not open.';
+  fixture.config.privacyNotice = 'Pre-event preview\nYour card selection stays in this browser. Community participation and pre-orders are not open.';
   const requests: Array<{ method: string; path: string }> = [];
   page.on('request', request => {
     const url = new URL(request.url());
@@ -62,7 +62,7 @@ test('a new visitor in draft creates a local downloadable composition without jo
   await expect(page.locator('#save-status')).toHaveText('The event is not open yet. Your composition is ready.');
   await expect(page.locator('#matchnumber')).toHaveText('BIG MATCH #0001');
   await expect(page.locator('#trio img')).toHaveCount(3);
-  await expect(page.locator('#contact-section')).toBeHidden();
+  await expect(page.locator('#preorder-section')).toBeHidden();
   await expect(page.locator('#download')).toBeEnabled();
   const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#download').click()]);
   expect(download.suggestedFilename()).toBe('BIG-MATCH-0001.png');
@@ -74,7 +74,7 @@ test('a new visitor in draft creates a local downloadable composition without jo
   await expect(privacy.locator('.notice-text')).toHaveText(fixture.config.privacyNotice);
   await expect(privacy).toContainText('Notice version: pre-event-2026-10-07-v1.');
   await expect(privacy.getByRole('heading', { name: 'Your browser session' })).toHaveCount(0);
-  await expect(privacy).not.toContainText('Catalogue requests are optional and stored separately from card choices.');
+  await expect(privacy).not.toContainText('Pre-orders are optional and stored separately from card choices.');
   for (const [name, href] of [
     ['GitHub privacy statement (opens in a new tab)', 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement'],
     ['Supabase privacy policy (opens in a new tab)', 'https://supabase.com/privacy'],
@@ -87,11 +87,11 @@ test('a new visitor in draft creates a local downloadable composition without jo
 
   await testInfo.attach('Pre-event request log', { body: JSON.stringify(requests, null, 2), contentType: 'application/json' });
   expect(requests).toContainEqual({ method: 'GET', path: '/functions/v1/big-match/events/big-2026' });
-  expect(requests.filter(request => request.path.startsWith('/auth/') || request.path.endsWith('/me') || request.path.endsWith('/contact'))).toEqual([]);
+  expect(requests.filter(request => request.path.startsWith('/auth/') || request.path.endsWith('/me') || request.path.endsWith('/contact') || request.path.endsWith('/preorder'))).toEqual([]);
   expect(fixture.authSignups).toBe(0);
   expect(fixture.committedWrites).toBe(0);
   expect(fixture.putBodies).toHaveLength(0);
-  expect(fixture.contactBodies).toHaveLength(0);
+  expect(fixture.preorderBodies).toHaveLength(0);
 });
 
 test('lost acknowledgement retains the same request ID and revision when retried', async ({ page }) => {
@@ -160,27 +160,33 @@ test('shared links fetch public aggregates without creating an identity or respo
   await expect(page.locator('#result')).toBeVisible();
   expect(fixture.authSignups).toBe(0);
   expect(fixture.putBodies).toHaveLength(0);
-  expect(fixture.contactBodies).toHaveLength(0);
+  expect(fixture.preorderBodies).toHaveLength(0);
 });
 
-test('catalogue failure keeps the form and retry ID; only acknowledgement shows success', async ({ page }) => {
-  fixture.config.contactEnabled = true; fixture.failContacts = 1;
+test('pre-order failure keeps the form and retry ID; acknowledgement records a reservation without payment', async ({ page }) => {
+  fixture.config.contactEnabled = true; fixture.failPreorders = 1;
   await page.goto('./');
   await choose(page);
   await expect(page.locator('#save-status')).toContainText('Your response is saved.');
-  await page.locator('#contact-email').fill('buyer@example.invalid');
-  await page.locator('#privacy-ack').check();
-  await page.locator('#submit-contact').click();
-  await expect(page.locator('#contact-status')).toContainText('could not be saved');
-  await expect(page.locator('#contact-email')).toHaveValue('buyer@example.invalid');
-  await expect(page.locator('#submit-contact')).toBeEnabled();
-  await page.locator('#submit-contact').click();
-  await expect(page.locator('#submit-contact')).toHaveText('REQUEST RECEIVED');
-  await expect(page.locator('#contact-email')).toHaveValue('');
-  expect(fixture.contactBodies).toHaveLength(2);
-  expect(fixture.contactBodies[0]).toEqual(fixture.contactBodies[1]);
-  expect(fixture.contactBodies[0].name).toBe('');
-  expect(fixture.contactBodies[0]).not.toHaveProperty('participationId');
+  await expect(page.locator('#preorder-link')).toBeVisible();
+  await page.locator('#preorder-link').click();
+  await page.locator('#preorder-email').fill('buyer@example.invalid');
+  await page.locator('#preorder-name').fill('Buyer');
+  await page.locator('#preorder-quantity').selectOption('2');
+  await page.locator('#preorder-country').fill('Italy');
+  await page.locator('#preorder-privacy-ack').check();
+  await page.locator('#submit-preorder').click();
+  await expect(page.locator('#preorder-status')).toContainText('could not be saved');
+  await expect(page.locator('#preorder-email')).toHaveValue('buyer@example.invalid');
+  await expect(page.locator('#submit-preorder')).toBeEnabled();
+  await page.locator('#submit-preorder').click();
+  await expect(page.locator('#submit-preorder')).toHaveText('PRE-ORDER RECEIVED');
+  await expect(page.locator('#preorder-status')).toContainText('No payment has been taken');
+  expect(fixture.preorderBodies).toHaveLength(2);
+  expect(fixture.preorderBodies[0]).toEqual(fixture.preorderBodies[1]);
+  expect(fixture.preorderBodies[0].quantity).toBe(2);
+  expect(fixture.preorderBodies[0].country).toBe('Italy');
+  expect(fixture.preorderBodies[0]).not.toHaveProperty('participationId');
 });
 
 test('deletion failure keeps the local response; confirmed deletion clears it', async ({ page }) => {

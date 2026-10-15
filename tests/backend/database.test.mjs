@@ -48,6 +48,7 @@ describe('BIG MATCH actual PostgreSQL migration and service RPCs', { concurrency
     await db.exec('CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY, is_anonymous boolean NOT NULL DEFAULT true);');
     await db.exec(await readFile(migration,'utf8'));
     await db.exec(await readFile(seed,'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261016012000_impersonae_preorders.sql', import.meta.url),'utf8'));
   });
   after(async () => { await db.close(); });
 
@@ -214,6 +215,21 @@ describe('BIG MATCH actual PostgreSQL migration and service RPCs', { concurrency
     assert.deepEqual(contacts.rows,[{email:'buyer@example.invalid',name:'Buyer',purpose:'catalogue',status:'received'}]);
     assert.equal((await mind(e.slug)).total,0);
     const fks=await db.query("SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='big_match_contacts'::regnamespace AND contype='f'");
+    assert(fks.rows.every(r=>!r.definition.includes('actors')&&!r.definition.includes('participations')));
+  });
+
+  it('stores preorder requests separately, idempotently and without card-choice foreign keys', async () => {
+    const e=await event(); await db.query('UPDATE big_match.events SET contact_enabled=true WHERE id=$1',[e.id]);
+    const key='c'.repeat(64); const req=randomUUID();
+    const args=[e.slug,' Buyer@Example.Invalid ','Buyer',2,' Italy ','test-v1',req,key];
+    const saved=await rpc('bm_preorder',args);
+    assert.deepEqual(saved,{saved:true,requestId:req});
+    assert.deepEqual(await rpc('bm_preorder',args),saved);
+    await assert.rejects(rpc('bm_preorder',[e.slug,'other@example.invalid','Other',1,null,'test-v1',req,key]), /BM_IDEMPOTENCY_CONFLICT/);
+    const rows=await db.query('SELECT email,name,quantity,country,purpose,status FROM big_match_preorders.requests WHERE event_id=$1',[e.id]);
+    assert.deepEqual(rows.rows,[{email:'buyer@example.invalid',name:'Buyer',quantity:2,country:'Italy',purpose:'impersonae-preorder',status:'requested'}]);
+    assert.equal((await mind(e.slug)).total,0);
+    const fks=await db.query("SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='big_match_preorders'::regnamespace AND contype='f'");
     assert(fks.rows.every(r=>!r.definition.includes('actors')&&!r.definition.includes('participations')));
   });
 
