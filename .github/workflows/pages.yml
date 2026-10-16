@@ -9,7 +9,6 @@ on:
         default: false
         required: true
   push:
-    branches: [main]
     tags: ['big-match-v*']
 
 permissions:
