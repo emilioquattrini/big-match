@@ -104,6 +104,126 @@
       "image": "cards/emotional.jpg",
       "alt": "Emotional — original Impersonae card artwork by Chiara Zhu",
       "ordinal": 13
+    },
+    {
+      "id": 14,
+      "slug": "angel",
+      "name": "Angel",
+      "image": "cards/angel.jpg",
+      "alt": "Angel — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 14
+    },
+    {
+      "id": 15,
+      "slug": "contradictor",
+      "name": "Contradictor",
+      "image": "cards/contradictor.jpg",
+      "alt": "Contradictor — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 15
+    },
+    {
+      "id": 16,
+      "slug": "democratic",
+      "name": "Democratic",
+      "image": "cards/democratic.jpg",
+      "alt": "Democratic — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 16
+    },
+    {
+      "id": 17,
+      "slug": "dreamer",
+      "name": "Dreamer",
+      "image": "cards/dreamer.jpg",
+      "alt": "Dreamer — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 17
+    },
+    {
+      "id": 18,
+      "slug": "eco",
+      "name": "Eco",
+      "image": "cards/eco.jpg",
+      "alt": "Eco — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 18
+    },
+    {
+      "id": 19,
+      "slug": "energetic",
+      "name": "Energetic",
+      "image": "cards/energetic.jpg",
+      "alt": "Energetic — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 19
+    },
+    {
+      "id": 20,
+      "slug": "fluid",
+      "name": "Fluid",
+      "image": "cards/fluid.jpg",
+      "alt": "Fluid — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 20
+    },
+    {
+      "id": 21,
+      "slug": "frozen",
+      "name": "Frozen",
+      "image": "cards/frozen.jpg",
+      "alt": "Frozen — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 21
+    },
+    {
+      "id": 22,
+      "slug": "idealist",
+      "name": "Idealist",
+      "image": "cards/idealist.jpg",
+      "alt": "Idealist — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 22
+    },
+    {
+      "id": 23,
+      "slug": "listener",
+      "name": "Listener",
+      "image": "cards/listener.jpg",
+      "alt": "Listener — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 23
+    },
+    {
+      "id": 24,
+      "slug": "mediator",
+      "name": "Mediator",
+      "image": "cards/mediator.jpg",
+      "alt": "Mediator — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 24
+    },
+    {
+      "id": 25,
+      "slug": "progressive",
+      "name": "Progressive",
+      "image": "cards/progressive.jpg",
+      "alt": "Progressive — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 25
+    },
+    {
+      "id": 26,
+      "slug": "scientist",
+      "name": "Scientist",
+      "image": "cards/scientist.jpg",
+      "alt": "Scientist — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 26
+    },
+    {
+      "id": 27,
+      "slug": "sociable",
+      "name": "Sociable",
+      "image": "cards/sociable.jpg",
+      "alt": "Sociable — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 27
+    },
+    {
+      "id": 28,
+      "slug": "warrior",
+      "name": "Warrior",
+      "image": "cards/warrior.jpg",
+      "alt": "Warrior — original Impersonae card artwork by Chiara Zhu",
+      "ordinal": 28
     }
   ]
 }
