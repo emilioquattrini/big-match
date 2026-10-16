@@ -1,0 +1,47 @@
+name: Import reviewed Impersonae card artwork
+
+on:
+  push:
+    branches: [feat/add-15-impersonae-cards]
+    paths:
+      - .github/workflows/import-drive-cards.yml
+      - catalog/impersonae-drive-selection-2026-10-16.json
+      - scripts/import-drive-cards.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-impersonae-drive-cards
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Install deterministic import dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
+          python -m pip install --disable-pip-version-check 'gdown==5.2.0' 'Pillow==11.3.0'
+      - name: Download, verify and render the selected cards
+        run: python scripts/import-drive-cards.py
+      - name: Commit generated card assets and manifest
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog/impersonae-v1.json public/cards/*.jpg
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Import 15 selected Impersonae card artworks'
+          git push origin HEAD:feat/add-15-impersonae-cards

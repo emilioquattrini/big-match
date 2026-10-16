@@ -1,4 +1,4 @@
--- Safe seed: original 13 cards and a DRAFT event. No example votes or contacts.
+-- Safe seed: original 13 cards and a DRAFT event. Extension migrations append later cards.
 -- Re-running never resets an existing event or changes its catalogue.
 BEGIN;
 INSERT INTO big_match.cards(deck_version,id,slug,name,image,ordinal) VALUES
@@ -27,6 +27,6 @@ ON CONFLICT(slug) DO NOTHING;
 INSERT INTO big_match.event_cards(event_id,deck_version,card_id)
 SELECT e.id,e.deck_version,c.id
 FROM big_match.events e JOIN big_match.cards c ON c.deck_version=e.deck_version
-WHERE e.slug='big-2026' AND e.status='draft' AND c.id BETWEEN 1 AND 13
+WHERE e.slug='big-2026' AND e.status='draft'
 ON CONFLICT DO NOTHING;
 COMMIT;

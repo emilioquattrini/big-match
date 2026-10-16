@@ -1,0 +1,111 @@
+{
+  "sourceFolder": "https://drive.google.com/drive/folders/1KBt5TOzPVqOKMsvC98hazNug50kqsau1",
+  "deckVersion": "impersonae-v1",
+  "cards": [
+    {
+      "id": 14,
+      "slug": "angel",
+      "name": "Angel",
+      "driveId": "1gNzAqx5Mh9TJAMn-4qTbkJ_jKtdpxwdn",
+      "sourceSha256": "16cf1c94227f77c94cd6cd7dc9dd0225aa0189cd9c271ba81a6e62eca1f6cef3"
+    },
+    {
+      "id": 15,
+      "slug": "contradictor",
+      "name": "Contradictor",
+      "driveId": "1CkHrHoUGz5dT4411ZyW_LtEtP7cDCEFT",
+      "sourceSha256": "0365f6f4966c177c9e352f17c6b877aa57eb6a297a26f5534e369603bdd93c50"
+    },
+    {
+      "id": 16,
+      "slug": "democratic",
+      "name": "Democratic",
+      "driveId": "11kQSkPAM2Vtf0TPnCCgZX2d1NqDf7gvP",
+      "sourceSha256": "1590ae189359ebe2825ac830808cf03b575ad6e05a7d5efb3f58e5cf04f783e9"
+    },
+    {
+      "id": 17,
+      "slug": "dreamer",
+      "name": "Dreamer",
+      "driveId": "1ijZCklIhHo60ThQcskB0_D89usd3a4oC",
+      "sourceSha256": "063af9c26d8e1b7dbdf273ebe1efa2b75e9580d499625668307e8b926adb0bb2"
+    },
+    {
+      "id": 18,
+      "slug": "eco",
+      "name": "Eco",
+      "driveId": "1ez345jMbRCpcf_k3mhJh9Tk1Ex1hl9-X",
+      "sourceSha256": "c6b7484f45bac81f3dec3d6fd78ee52d89473260e747b8c5624e2bb2e6676832"
+    },
+    {
+      "id": 19,
+      "slug": "energetic",
+      "name": "Energetic",
+      "driveId": "1g3K8drpgu1LkXDSUmSMjKAGV7lO3cViJ",
+      "sourceSha256": "556fafc29b7fe68022dbd08388e2acf2f74e9bd6f460324775a54981a682e021"
+    },
+    {
+      "id": 20,
+      "slug": "fluid",
+      "name": "Fluid",
+      "driveId": "1Qi_v2xWxeiqlgljOjwOzeI5c9ZIL5TRb",
+      "sourceSha256": "a0b7d56c0d2998557fbe26676f10140fe4188b07ad6fecb994ba767f5f2b7b2d"
+    },
+    {
+      "id": 21,
+      "slug": "frozen",
+      "name": "Frozen",
+      "driveId": "1CLZpykRjIGX3Jg2nAziZYjOtpt6b53L0",
+      "sourceSha256": "c62581fc7bf0bc9b187861818965c3c36477324b3a8d1d1b1806c620de0cf334"
+    },
+    {
+      "id": 22,
+      "slug": "idealist",
+      "name": "Idealist",
+      "driveId": "18P14uWKU5wZKH4H5A78L3kpv6KICxf0h",
+      "sourceSha256": "a0c6b8ba7c123a6d709427e6dfb1bb6852093a6e92d7610d719fc84f70e87308"
+    },
+    {
+      "id": 23,
+      "slug": "listener",
+      "name": "Listener",
+      "driveId": "1XqXLrKSzTLbJXCou9m5fubFa77xbij6N",
+      "sourceSha256": "666072ca59c6fb9e5518727a0affefce0a9133687b0a868ca34567f901fbdca2"
+    },
+    {
+      "id": 24,
+      "slug": "mediator",
+      "name": "Mediator",
+      "driveId": "1bEh55qo0xajsP4NrsekqhfRutqwsetJt",
+      "sourceSha256": "05ccf48d002b91d7b7ea3d1d3de0ce2c45fd285a7746da9f8ef71d721bb5c9a9"
+    },
+    {
+      "id": 25,
+      "slug": "progressive",
+      "name": "Progressive",
+      "driveId": "1IeylR8jygCNb49dPlIbxRr8y73r9kQ4X",
+      "sourceSha256": "a7370bf8cda0f72e011be5023ff9df105b80cfec7f76ec1b6cb5b7b88c5562a3"
+    },
+    {
+      "id": 26,
+      "slug": "scientist",
+      "name": "Scientist",
+      "driveId": "18Vyty2WjU1y06MGlVYnGT1k5GwDjs2Yh",
+      "sourceSha256": "18f49b8cf5d63dd2c87283afb139fb5ff692dbfc076ee037e6aa29f82e3ebe17"
+    },
+    {
+      "id": 27,
+      "slug": "sociable",
+      "name": "Sociable",
+      "driveId": "1s-LF7Tzj5hkXU0NM_FjuDpXCXjY5ovyH",
+      "sourceSha256": "5292952b4efe9adc76ea97ee8ebcdac1c6ba4b359d030f4d93b8e29099f22a89"
+    },
+    {
+      "id": 28,
+      "slug": "warrior",
+      "name": "Warrior",
+      "driveId": "1-jN5ciTu6yHD2Z-hp_h7brBpmOhb4oOy",
+      "sourceSha256": "eafb38e6e50053fdfad731c1041371e34aa4ecec469fd10187312b74e5e7ff14"
+    }
+  ]
+}
