@@ -10,6 +10,9 @@ on:
         required: true
   push:
     tags: ['big-match-v*']
+    # One-time, explicitly requested custom-domain release. Remove after verification.
+    branches: [main]
+    paths: ['docs/releases/2026-10-18-custom-domain.md']
 
 permissions:
   contents: read
@@ -31,11 +34,15 @@ jobs:
       contents: read
       pages: read
     env:
-      VITE_APP_BASE: /big-match/
+      # Production is served at the custom domain root; local prefix builds remain supported.
+      VITE_APP_BASE: /
       VITE_EVENT_SLUG: ${{ vars.VITE_EVENT_SLUG || 'big-2026' }}
-      VITE_APP_URL: ${{ vars.VITE_APP_URL }}
+      VITE_APP_URL: https://bigmatch.justcolors.net/
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      integrity: ${{ steps.metadata.outputs.integrity }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -58,6 +65,23 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check:release -- --production --check-backend
+      - name: Verify custom-domain API access without saving data
+        run: node scripts/check-deployment.mjs --backend
+      - name: Record the checked artifact integrity
+        id: metadata
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFile, readFile } from 'node:fs/promises';
+          import { createHash } from 'node:crypto';
+          import { listFiles } from './scripts/release-utils.mjs';
+          const info = JSON.parse(await readFile('dist/build-info.json', 'utf8'));
+          const integrity = {};
+          for (const file of await listFiles('dist')) {
+            if (file === '.nojekyll') continue;
+            integrity[file] = createHash('sha256').update(await readFile('dist/' + file)).digest('hex');
+          }
+          await appendFile(process.env.GITHUB_OUTPUT, `version=${info.version}\nintegrity=${JSON.stringify(integrity)}\n`);
+          NODE
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
@@ -69,6 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
@@ -78,3 +103,16 @@ jobs:
       - name: Deploy the checked artifact
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify HTTPS and every deployed public file
+        env:
+          VITE_APP_URL: https://bigmatch.justcolors.net/
+          EXPECTED_VERSION: ${{ needs.build.outputs.version }}
+          EXPECTED_FILES: ${{ needs.build.outputs.integrity }}
+        run: node scripts/check-deployment.mjs --live
