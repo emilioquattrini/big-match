@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
-const baseURL = process.env.E2E_BASE_URL || 'http://127.0.0.1:4175/big-match/';
+const appBase = process.env.VITE_APP_BASE || '/big-match/';
+if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(appBase)) throw new Error('Invalid browser test app base.');
+const baseURL = process.env.E2E_BASE_URL || `http://127.0.0.1:4175${appBase}`;
 if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(baseURL).hostname)) {
   throw new Error('Browser regressions must run against a local artifact, never a live event.');
 }
