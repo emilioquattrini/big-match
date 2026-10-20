@@ -46,6 +46,31 @@ test('a genuine zero response count becomes one private browser response', async
   await expect(page.locator('#preorder-section')).not.toBeVisible();
 });
 
+test('closing a saved result clears the visible choice without deleting the recorded response', async ({ page }) => {
+  await page.goto('./');
+  await choose(page);
+  await expect(page.locator('#save-status')).toContainText('Your response is saved.');
+  expect(fixture.authSignups).toBe(1);
+  expect(fixture.committedWrites).toBe(1);
+
+  await page.locator('#close').click();
+  await expect(page.locator('#result')).not.toBeVisible();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  expect(fixture.deleteCalls).toBe(0);
+  expect(fixture.committedWrites).toBe(1);
+
+  await page.reload();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+
+  for (const id of [1, 2, 4]) await page.locator(`button[data-card-id="${id}"]`).click();
+  await expect(page.locator('#result')).toBeVisible();
+  await expect(page.locator('#save-status')).toContainText('Your response is saved.');
+  expect(fixture.authSignups).toBe(1);
+  expect(fixture.putBodies).toHaveLength(2);
+  expect(fixture.putBodies[1].expectedRevision).toBe(1);
+  expect(fixture.committedWrites).toBe(2);
+});
+
 test('a new visitor in draft creates a local downloadable composition without joining the event', async ({ page }, testInfo) => {
   fixture.config.status = 'draft';
   fixture.config.privacyVersion = 'pre-event-2026-10-07-v1';
@@ -147,8 +172,8 @@ test('a delayed latest-result read cannot reopen or change a result after closin
   await (await response).finished();
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(page.locator('#result')).not.toBeVisible();
-  await expect(page.locator('button[data-card-id="3"]')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('button[data-card-id="4"]')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  for (const id of [1, 2, 3, 4]) await expect(page.locator(`button[data-card-id="${id}"]`)).toHaveAttribute('aria-pressed', 'false');
 });
 
 test('shared links fetch public aggregates without creating an identity or response', async ({ page }) => {
@@ -198,7 +223,7 @@ test('deletion failure keeps the local response; confirmed deletion clears it', 
   await page.locator('#erase-data').click();
   await page.locator('#confirm-delete').click();
   await expect(page.locator('#delete-status')).toContainText('temporarily unavailable');
-  await expect(page.locator('#counter')).toHaveText('3 / 3 selected');
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
   await page.locator('#confirm-delete').click();
   await expect(page.locator('#delete-dialog')).not.toBeVisible();
   await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
