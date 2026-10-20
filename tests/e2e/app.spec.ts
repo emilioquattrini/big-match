@@ -57,7 +57,7 @@ test('the current Pages prefix loads all cards and supports search without selec
   expect(errors).toEqual([]);
 });
 
-test('third-card transition, modal focus, close and reopen remain consistent', async ({ page }) => {
+test('third-card transition, modal focus, edit preserves cards and close starts a blank match', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
@@ -68,10 +68,21 @@ test('third-card transition, modal focus, close and reopen remain consistent', a
       expect(await page.evaluate(() => Boolean(document.activeElement?.closest('#result')))).toBe(true);
     }
   }
+  await expect(page.locator('#again')).toBeEnabled();
+  await page.locator('#again').click();
+  await expect(page.locator('#result')).not.toBeVisible();
+  await expect(page.locator('#counter')).toHaveText('3 / 3 selected');
+  await expect(page.locator('#view-result')).toBeVisible();
+  await page.locator('#view-result').click();
+  await expect(page.locator('#result')).toBeVisible();
+
   await page.locator('#close').click();
   await expect(page.locator('#result')).not.toBeVisible();
-  await page.getByRole('button', { name: /view.*match/i }).click();
-  await expect(page.locator('#result')).toBeVisible();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  await expect(page.locator('#view-result')).toBeHidden();
+  for (const id of [1, 2, 3]) await expect(page.locator(`button[data-card-id="${id}"]`)).toHaveAttribute('aria-pressed', 'false');
+  await page.reload();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
   expect(errors).toEqual([]);
 });
 

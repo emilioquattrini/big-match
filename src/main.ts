@@ -171,7 +171,22 @@ function showResult(ids: number[], kind: 'own' | 'shared'): void {
   updateBusy(); void preparePoster();
 }
 
-function closeResult(): void { resultGeneration++; if (result.open) result.close(); if (location.hash.startsWith('#/')) navigate('', true); renderSelection(); }
+function resetVisibleSelection(): void {
+  clearTimeout(selectionTimer); selectionGeneration++;
+  selected = [];
+  state.resultIds = null;
+  search.value = '';
+  persist();
+  renderSelection();
+}
+
+function closeResult(resetSelection = false): void {
+  resultGeneration++;
+  if (result.open) result.close();
+  if (location.hash.startsWith('#/')) navigate('', true);
+  if (resetSelection && viewKind === 'own') resetVisibleSelection();
+  else renderSelection();
+}
 
 async function preparePoster(): Promise<void> {
   const generation = resultGeneration;
@@ -416,7 +431,9 @@ function handleRoute(): void {
     if (parsed) { showResult(parsed, 'shared'); void loadEvent().then(() => refreshPublic()); return; }
     el('event-notice').hidden = false; el('event-notice').textContent = 'This shared link is not valid for the current event. Choose three cards to create your own composition.'; navigate('', true);
   }
+  const resetAfterOwnResult = result.open && viewKind === 'own';
   resultGeneration++; if (result.open) result.close();
+  if (resetAfterOwnResult) resetVisibleSelection();
 }
 
 async function refreshPublic(): Promise<void> { if (!api.configured) { if (viewKind === 'shared') setStatus('This is a shared composition. Community data is unavailable right now.'); return; } try { acceptMind(await api.mind()); } catch { el('mind-status').textContent = latestMind ? 'Showing the last available community counts. The latest update could not be loaded.' : 'The community could not be loaded. Please try again when connected.'; } }
@@ -426,8 +443,8 @@ el<HTMLImageElement>('brand-logo').src = new URL('brand/impersonae.png', assetBa
 buildGrid(); updatePrivacy();
 search.addEventListener('input', renderSelection);
 el('view-result').addEventListener('click', () => beginOwnResult([...selected]));
-el('close').addEventListener('click', closeResult);
-result.addEventListener('cancel', event => { event.preventDefault(); closeResult(); });
+el('close').addEventListener('click', () => closeResult(true));
+result.addEventListener('cancel', event => { event.preventDefault(); closeResult(true); });
 el('again').addEventListener('click', editCards);
 el('make-own').addEventListener('click', () => { closeResult(); el('pick-title').scrollIntoView({ block: 'start' }); el('pick-title').focus({ preventScroll: true }); });
 el('download').addEventListener('click', downloadStory);
