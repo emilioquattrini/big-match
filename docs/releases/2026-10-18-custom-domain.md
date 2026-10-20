@@ -24,3 +24,11 @@ Server-side data remains in the same Supabase project. Browser-local sessions an
 ## Rollback
 
 Restore the previous Pages production base/URL and GitHub Pages custom-domain setting together, then run a checked release. Do not alter Vague Vase. The additive HTTPS origin can be left in place during rollback or removed by redeploying the previous Edge entrypoint. No database rollback is required.
+
+
+## Follow-up release — 20 October 2026
+
+Explicitly requested production publish after merge commit `17570863bb1ba61b5bad51658f17bc0272cc757c`.
+Scope: reset the visible personal selection to 0/3 when a completed match is closed, while preserving the already-saved participation and its contribution to community counts. No matching, aggregate-map, pre-order, privacy, retention or authorization rule is changed by this follow-up.
+
+Pre-deploy validation: GitHub Actions run 39420608220 completed successfully for both the custom-domain root and the legacy /big-match/ prefix.
