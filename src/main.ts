@@ -168,7 +168,23 @@ function showResult(ids: number[], kind: 'own' | 'shared'): void {
   updateBusy(); void preparePoster();
 }
 
-function closeResult(): void { resultGeneration++; if (result.open) result.close(); if (location.hash.startsWith('#/')) navigate('', true); renderSelection(); }
+function clearOwnSelectionAfterResult(): void {
+  clearTimeout(selectionTimer); selectionGeneration++;
+  selected = [];
+  state.selectedIds = [];
+  state.resultIds = null;
+  search.value = '';
+  persist();
+}
+
+function closeResult(): void {
+  const resetOwnSelection = viewKind === 'own';
+  resultGeneration++;
+  if (result.open) result.close();
+  if (location.hash.startsWith('#/')) navigate('', true);
+  if (resetOwnSelection) clearOwnSelectionAfterResult();
+  renderSelection();
+}
 
 async function preparePoster(): Promise<void> {
   const generation = resultGeneration;
@@ -332,7 +348,7 @@ function updatePrivacy(): void {
     paragraph(eventConfig.privacyNotice, 'notice-text');
     paragraph(`Data controller: ${eventConfig.controllerName}. Contact: ${eventConfig.controllerEmail}.`);
     paragraph(`Notice version: ${eventConfig.privacyVersion}.`);
-  } else paragraph('This preview keeps your card selection in this browser. Community participation and catalogue requests are unavailable until the event opens. You can clear your selection using “Delete my participation”.');
+  } else paragraph('This preview keeps your card selection while a result is active. Closing the result starts a fresh 0/3 selection. “Delete my participation” separately removes a saved community response.');
   const heading = document.createElement('h3'); heading.textContent = 'Your browser session'; target.append(heading);
   paragraph('When the event is open, a private session lets you update one response from this browser. Clearing browser data or using another device can create a separate response. Public results show only totals.');
   paragraph('A shared link contains the event and the three card IDs. It does not include your browser session or contact details.');
@@ -379,7 +395,9 @@ function handleRoute(): void {
     if (parsed) { showResult(parsed, 'shared'); void loadEvent().then(() => refreshPublic()); return; }
     el('event-notice').hidden = false; el('event-notice').textContent = 'This shared link is not valid for the current event. Choose three cards to create your own composition.'; navigate('', true);
   }
+  const resetOwnSelection = result.open && viewKind === 'own';
   resultGeneration++; if (result.open) result.close();
+  if (resetOwnSelection) { clearOwnSelectionAfterResult(); renderSelection(); }
 }
 
 async function refreshPublic(): Promise<void> { if (!api.configured) { if (viewKind === 'shared') setStatus('This is a shared composition. Community data is unavailable right now.'); return; } try { acceptMind(await api.mind()); } catch { el('mind-status').textContent = latestMind ? 'Showing the last available community counts. The latest update could not be loaded.' : 'The community could not be loaded. Please try again when connected.'; } }
