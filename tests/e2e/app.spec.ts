@@ -51,7 +51,7 @@ test('the current Pages prefix loads all cards and supports search without selec
   expect(errors).toEqual([]);
 });
 
-test('third-card transition, modal focus, close and reopen remain consistent', async ({ page }) => {
+test('closing a completed match resets the local selection and allows a fresh match', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
@@ -64,7 +64,12 @@ test('third-card transition, modal focus, close and reopen remain consistent', a
   }
   await page.locator('#close').click();
   await expect(page.locator('#result')).not.toBeVisible();
-  await page.getByRole('button', { name: /view.*match/i }).click();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  await expect(page.locator('#view-result')).toBeHidden();
+  for (const id of [1, 2, 3]) await expect(page.locator(`button[data-card-id="${id}"]`)).toHaveAttribute('aria-pressed', 'false');
+  await page.reload();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  await choose(page, [4, 5, 6]);
   await expect(page.locator('#result')).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -145,6 +150,7 @@ test('download creates a real 1080 by 1920 PNG', async ({ page }, testInfo) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.locator('#close').click();
   await expect(page.locator('#result')).not.toBeVisible();
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
   await page.locator('#pick-title').evaluate(element => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
   const selectionScreenshot = testInfo.outputPath('big-match-selection-view.png');
   await page.screenshot({ path: selectionScreenshot });
