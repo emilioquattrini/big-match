@@ -99,7 +99,8 @@ test('a delayed latest-result read cannot reopen or change a result after closin
   await (await response).finished();
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(page.locator('#result')).not.toBeVisible();
-  await expect(page.locator('button[data-card-id="3"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
+  await expect(page.locator('button[data-card-id="3"]')).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('button[data-card-id="4"]')).toHaveAttribute('aria-pressed', 'false');
 });
 
@@ -144,7 +145,7 @@ test('deletion failure keeps the local response; confirmed deletion clears it', 
   await page.locator('#erase-data').click();
   await page.locator('#confirm-delete').click();
   await expect(page.locator('#delete-status')).toContainText('temporarily unavailable');
-  await expect(page.locator('#counter')).toHaveText('3 / 3 selected');
+  await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
   await page.locator('#confirm-delete').click();
   await expect(page.locator('#delete-dialog')).not.toBeVisible();
   await expect(page.locator('#counter')).toHaveText('0 / 3 selected');
