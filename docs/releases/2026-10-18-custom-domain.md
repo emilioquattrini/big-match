@@ -32,3 +32,10 @@ Explicitly requested production publish after merge commit `17570863bb1ba61b5bad
 Scope: reset the visible personal selection to 0/3 when a completed match is closed, while preserving the already-saved participation and its contribution to community counts. No matching, aggregate-map, pre-order, privacy, retention or authorization rule is changed by this follow-up.
 
 Pre-deploy validation: GitHub Actions run 39420608220 completed successfully for both the custom-domain root and the legacy /big-match/ prefix.
+
+## Follow-up release — 22 October 2026
+
+Explicitly requested production publish after merge commit `aec168aa3b557f2fd073555f3cbd31fa881e8b0a`.
+Scope: add a results-page message explaining that every BIG MATCH response contributes to a final collective result; at the end of BIG, the three most selected Impersonae will be published. The callout links directly to `@justcolors____` on Instagram. No matching, aggregation, pre-order, privacy, retention or authorization rule is changed.
+
+Pre-deploy validation: static checks, 63 application/SQL tests, 9 service-worker tests, release build and the complete GitHub-prefix browser matrix succeeded. The production workflow repeats all release gates before publishing.
