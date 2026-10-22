@@ -39,3 +39,9 @@ Explicitly requested production publish after merge commit `aec168aa3b557f2fd073
 Scope: add a results-page message explaining that every BIG MATCH response contributes to a final collective result; at the end of BIG, the three most selected Impersonae will be published. The callout links directly to `@justcolors____` on Instagram. No matching, aggregation, pre-order, privacy, retention or authorization rule is changed.
 
 Pre-deploy validation: static checks, 63 application/SQL tests, 9 service-worker tests, release build and the complete GitHub-prefix browser matrix succeeded. The production workflow repeats all release gates before publishing.
+
+
+## Follow-up release — 22 October 2026
+
+Production publish requested during BIG after visitor feedback on the result screen.
+Scope: move the final collective reveal message immediately below the visitor's three-card result, before sharing controls, and add a prominent follow CTA to @justcolors____. Existing matching, BIG MIND aggregates, participation persistence, privacy, pre-order, and backend logic are unchanged.
