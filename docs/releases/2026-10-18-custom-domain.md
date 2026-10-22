@@ -45,3 +45,8 @@ Pre-deploy validation: static checks, 63 application/SQL tests, 9 service-worker
 
 Production publish requested during BIG after visitor feedback on the result screen.
 Scope: move the final collective reveal message immediately below the visitor's three-card result, before sharing controls, and add a prominent follow CTA to @justcolors____. Existing matching, BIG MIND aggregates, participation persistence, privacy, pre-order, and backend logic are unchanged.
+
+
+## Follow-up release — 22 October 2026, optional catalogue request
+
+Publish the reviewed catalogue contact form added to the BIG MATCH results page. The interface shows the form only when the event is open and contact_enabled is true. The backend has been enabled with a dedicated updated privacy notice. Submission checks a successful server acknowledgement before showing success; no newsletter consent is inferred. Confirm the deployed release displays the form and that contacts are persisted after explicit consent. Existing matches and preorder data remain unchanged.
