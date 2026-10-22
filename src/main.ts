@@ -35,6 +35,8 @@ let saveBusy = false;
 let refreshBusy = false;
 let dataGeneration = 0;
 let preorderBusy = false;
+let contactBusy = false;
+let contactRequest: {payload:string;id:string}|null = null;
 let deleteBusy = false;
 let exportBusy = false;
 let retryAction: 'save' | 'refresh' | 'latest' | null = null;
@@ -256,12 +258,13 @@ async function loadEvent(force = false): Promise<EventConfig | null> {
       el('question').textContent = config.question;
       const notice = el('event-notice'); notice.hidden = config.status === 'open'; notice.textContent = config.status === 'closed' ? 'The event has ended. You can still explore the cards and view the community.' : 'The event is not open yet. You can explore the cards and create your composition.';
       const preorderAvailable = config.preorderEnabled && config.status === 'open';
+      el('contact-section').hidden = !(config.contactEnabled && config.status === 'open');
       el('preorder-section').hidden = !preorderAvailable;
       el('preorder-link').hidden = !preorderAvailable;
       updatePrivacy(); return config;
     } catch (error) {
       el('event-notice').hidden = false; el('event-notice').textContent = incompatible ? message(error) : 'The community is temporarily unavailable. Your composition is still here.';
-      el('preorder-section').hidden = true; el('preorder-link').hidden = true; updatePrivacy(); return null;
+      el('preorder-section').hidden = true; el('contact-section').hidden = true; el('preorder-link').hidden = true; updatePrivacy(); return null;
     } finally { configPromise = null; }
   })();
   return configPromise;
@@ -371,9 +374,23 @@ function updatePrivacy(): void {
   const heading = document.createElement('h3'); heading.textContent = 'Your browser session'; target.append(heading);
   paragraph('When the event is open, a private session lets you update one response from this browser. Clearing browser data or using another device can create a separate response. Public results show only totals.');
   paragraph('A shared link contains the event and the three card IDs. It does not include your browser session or contact details.');
+  paragraph('Optional catalogue requests collect your email solely to respond to your request. They are not newsletter subscriptions.');
   paragraph('Impersonae pre-order requests are optional and stored separately from card choices. They are used only to manage the requested purchase and are not a newsletter subscription. No payment is taken in BIG MATCH. Pre-order records are scheduled for deletion after 180 days unless they are needed to complete or document the requested purchase.');
 }
 
+async function requestContact(event: SubmitEvent): Promise<void> {
+ event.preventDefault(); if(contactBusy) return;
+ const form=el<HTMLFormElement>('contact-form'); if(!form.reportValidity()) return;
+ if(!eventConfig?.contactEnabled || eventConfig.status!=='open'){el('contact-status').textContent='Catalogue requests are unavailable right now.'; return;}
+ const body={email:el<HTMLInputElement>('contact-email').value.trim(),name:el<HTMLInputElement>('contact-name').value.trim(),privacyVersion:eventConfig.privacyVersion,website:(form.elements.namedItem('website') as HTMLInputElement).value};
+ const payload=JSON.stringify(body);if(contactRequest?.payload!==payload)contactRequest={payload,id:crypto.randomUUID()};
+ contactBusy=true;const button=el<HTMLButtonElement>('submit-contact');button.disabled=true;button.textContent='SAVING REQUEST…';
+ try {const ack=await api.contact({...body,requestId:contactRequest.id});if(!ack.saved)throw new ApiError('Request not saved.',502,'INVALID_RESPONSE');
+ form.reset();form.querySelectorAll<HTMLInputElement>('input').forEach(input=>input.disabled=true);
+ button.textContent='REQUEST RECEIVED';el('contact-status').textContent='Your catalogue request has been saved successfully.';contactRequest=null;
+ }catch(error){el('contact-status').textContent=message(error);button.disabled=false;button.textContent='REQUEST CATALOGUE ↗';if((error as ApiError).status===409){await loadEvent(true);el<HTMLInputElement>('contact-privacy-ack').checked=false;}}
+ finally{contactBusy=false;}
+}
 async function requestPreorder(event: SubmitEvent): Promise<void> {
   event.preventDefault(); if (preorderBusy) return;
   const form = el<HTMLFormElement>('preorder-form'); if (!form.reportValidity()) return;
@@ -459,6 +476,7 @@ el('preorder-link').addEventListener('click', event => {
   el('preorder-section').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   setTimeout(() => el<HTMLInputElement>('preorder-email').focus({ preventScroll: true }), 250);
 });
+el('contact-form').addEventListener('submit', event => { void requestContact(event); });
 el('preorder-form').addEventListener('submit', event => { void requestPreorder(event); });
 el('preorder-form').addEventListener('input', updateBusy);
 el('preorder-form').addEventListener('change', updateBusy);
