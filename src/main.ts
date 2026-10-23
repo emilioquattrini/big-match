@@ -8,7 +8,7 @@ import { renderPoster } from './poster.ts';
 import { renderMind } from './mind.ts';
 
 const catalogue: Catalogue = rawCatalogue;
-const cards: Card[] = catalogue.cards;
+const cards: Card[] = catalogue.cards.map(card => card.id === 11 ? { ...card, name: 'Overthinker' } : card);
 const byId = new Map(cards.map(card => [card.id, card]));
 const validIds = new Set(cards.map(card => card.id));
 const eventSlug = import.meta.env.VITE_EVENT_SLUG || 'big-2026';
