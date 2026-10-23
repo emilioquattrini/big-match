@@ -50,3 +50,8 @@ Scope: move the final collective reveal message immediately below the visitor's 
 ## Follow-up release — 22 October 2026, optional catalogue request
 
 Publish the reviewed catalogue contact form added to the BIG MATCH results page. The interface shows the form only when the event is open and contact_enabled is true. The backend has been enabled with a dedicated updated privacy notice. Submission checks a successful server acknowledgement before showing success; no newsletter consent is inferred. Confirm the deployed release displays the form and that contacts are persisted after explicit consent. Existing matches and preorder data remain unchanged.
+
+
+## Follow-up release — 23 October 2026
+
+Production publish requested to correct the visible label for card id 11 from "Otherthinker" to "Overthinker". Technical identity is unchanged: id 11, slug `otherthinker`, image file `cards/otherthinker.jpg`, backend data, match logic and counts are untouched. The frontend display label updates automatically in card listings, result names and the card-frequency ranking.
